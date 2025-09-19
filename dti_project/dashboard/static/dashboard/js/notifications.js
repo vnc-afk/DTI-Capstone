@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const notificationsList = document.querySelector('.notifications-list');
 
     // --- Notification sound setup ---
-    const notificationSound = new Audio("/static/dashboard/sounds/What%20The%20Hell%20Meme%20Sound%20Effect.mp3");
+    const notificationSound = new Audio("/static/dashboard/sounds/Ding%20Sound%20Effect.mp3");
     notificationSound.volume = 0.3; // subtle volume
     let audioUnlocked = false;
     let queuedNotifications = 0;
@@ -61,7 +61,8 @@ document.addEventListener('DOMContentLoaded', function() {
     // --- Handle incoming notifications ---
     notificationSocket.onmessage = function(e) {
         const data = JSON.parse(e.data);
-
+        console.log("Notification received:", data);
+        
         // Update bell counter
         if (bellIcon) {
             let count = parseInt(bellIcon.dataset.count || "0", 10) + 1;
@@ -79,12 +80,21 @@ document.addEventListener('DOMContentLoaded', function() {
         // Prepend new notification item to list
         const li = document.createElement("li");
         li.innerHTML = `
-            <div class="system-icon"><i class="fa-solid fa-cog"></i></div>
-            <div class="details">
-                <div class="row">${data.message}</div>
-                <p class="time-since">Just now</p>
+        ${data.sender && data.sender.profile_picture ? `
+            <div class="sender-profile-pic">
+                <img src="${data.sender.profile_picture}" alt="">
             </div>
-        `;
+        ` : `
+            <div class="system-icon"><i class="fa-solid fa-cog"></i></div>
+        `}
+        <div class="details">
+            <div class="row">${data.message}</div>
+            <p class="time-since">${data.time_since || "Just now"}</p>
+        </div>
+    `;
+        notificationsList.prepend(li);
+
+
         if (notificationsList) notificationsList.prepend(li);
     };
 

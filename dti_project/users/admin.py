@@ -1,6 +1,6 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
-from .models import Notification, User
+from .models import User
 
 
 class UserAdmin(BaseUserAdmin):
@@ -44,8 +44,3 @@ class UserAdmin(BaseUserAdmin):
 
 # register AFTER defining the class
 admin.site.register(User, UserAdmin)
-
-@admin.register(Notification)
-class NotificationAdmin(admin.ModelAdmin):
-    list_display = ('user', 'message', 'date')
-    search_fields = ('user',)

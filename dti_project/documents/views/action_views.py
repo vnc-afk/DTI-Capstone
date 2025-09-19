@@ -2,6 +2,7 @@ from django.http import HttpResponseForbidden
 from django.contrib import messages
 from django.apps import apps
 from django.shortcuts import redirect
+from notifications.utils import send_user_notification
 from notifications.models import Notification
 from ..models.base_models import DraftModel
 from ..mixins.filter_mixins import FilterableDocumentMixin
@@ -54,15 +55,24 @@ class ApproveDocumentsView(LoginRequiredMixin, View):
 
                     # Send it to the web socket group
                     channel_layer = get_channel_layer()
+                    # send_user_notification(document.user.id, notification)
+
                     async_to_sync(channel_layer.group_send)(
-                        f"notifications_{document.user.id}",  # each user has their own group
-                        {
-                            'type': 'send_notification',
-                            'message': notification.message,
+                    f"notifications_{document.user.id}",
+                    {
+                        'type': 'notification.message',
+                        'content': {
                             'id': notification.id,
-                            'type_name': notification.type
+                            'message': notification.message,   # <-- plain message field
+                            'type_name': notification.type,
+                            'time_since': notification.time_display(),
+                            'sender': {
+                                'username': notification.sender.username if notification.sender else None,
+                                'profile_picture': notification.sender.profile_picture.url if notification.sender and notification.sender.profile_picture else None,
+                            } if notification.sender else None,
                         }
-                    )
+                    }
+                )
 
             except Exception as e:
                 print("Error approving:", e)

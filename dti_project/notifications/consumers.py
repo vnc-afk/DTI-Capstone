@@ -8,19 +8,21 @@ class NotificationConsumer(AsyncWebsocketConsumer):
             self.group_name = f"notifications_{self.scope['user'].id}"
             await self.channel_layer.group_add(self.group_name, self.channel_name)
             await self.accept()
+            print(f"WebSocket connected. Subscribed to {self.group_name}")
         else:
             print("User not authenticated, closing socket")
             await self.close()
 
     async def disconnect(self, close_code):
-        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        if hasattr(self, "group_name"):
+            await self.channel_layer.group_discard(self.group_name, self.channel_name)
+            print(f"Disconnected from {self.group_name}")
 
     async def receive(self, text_data):
         data = json.loads(text_data)
-        # Optional: echo back
-        await self.send(text_data=json.dumps({'message': data.get('message')}))
+        print("Received from client:", data)
+        await self.send(text_data=json.dumps({"message": data.get("message")}))
 
-    async def send_notification(self, event):
-        await self.send(text_data=json.dumps({
-            'message': event['message']
-        }))
+    async def notification_message(self, event):
+        print("Sending notification to client:", event["content"])
+        await self.send(text_data=json.dumps(event["content"]))

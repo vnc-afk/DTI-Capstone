@@ -59,3 +59,9 @@ class User(AbstractUser):
     
     def new_notifications(self):
         return self.notifications.filter(is_read=False)
+    
+    def save(self, *args, **kwargs):
+        # Force superusers to always be admin
+        if self.is_superuser:
+            self.role = self.Roles.ADMIN
+        super().save(*args, **kwargs)
