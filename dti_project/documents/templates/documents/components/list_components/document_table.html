@@ -14,6 +14,9 @@
                 <th>Status</th>
                 <th>Date Created</th>
                 <th>Payment</th>
+                <th>Inspection</th>
+                <th>Order of Payment</th>
+                <th>Checklist</th>
             </tr>
         </thead>
         <tbody>
@@ -39,14 +42,57 @@
                             {{ document.date_filed }}
                         {% endif %}
                     </td>
+                    <!-- Payment -->
                     <td>
-                    {% if document.status == 'approved' %}
-                        <a href="{% url 'payment-page' %}" class="btn btn-green">Pay</a>
-                    {% else %}
-                        <span class="text-muted">N/A</span>
-                    {% endif %}
+                        {% if document.status|lower == 'approved' %}
+                            {% if document.model_name|lower == "salespromotionpermitapplication" %}
+                                <a href="{% url 'payment-page' 'sales-promo' document.id %}" class="btn btn-green">Pay</a>
+                            {% elif document.model_name|lower == "servicerepairaccreditationapplication" %}
+                                <a href="{% url 'payment-page' 'service-repair' document.id %}" class="btn btn-green">Pay</a>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted">N/A</span>
+                        {% endif %}
                     </td>
 
+                    <!-- Inspection -->
+                    <td>
+                        {% if request.user.is_staff %}
+                            {% if not document.inspection_done %}
+                                <a href="{% url 'create-inspection-validation-report' %}?doc_id={{ document.id }}" class="btn btn-blue">Create</a>
+                            {% else %}
+                                <span class="btn btn-gray">Completed</span>
+                            {% endif %}
+                        {% elif document.inspection_done %}
+                            <span class="btn btn-gray">Completed</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Order of Payment -->
+                    <td>
+                        {% if request.user.is_staff %}
+                            {% if not document.opp_done %}
+                                <a href="{% url 'create-order-of-payment' %}?doc_id={{ document.id }}" class="btn btn-blue">Create</a>
+                            {% else %}
+                                <span class="btn btn-gray">Completed</span>
+                            {% endif %}
+                        {% elif document.opp_done %}
+                            <span class="btn btn-gray">Completed</span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Checklist -->
+                    <td>
+                        {% if request.user.is_staff %}
+                            {% if not document.checklist_done %}
+                                <a href="{% url 'create-checklist-evaluation-sheet' %}?doc_id={{ document.id }}" class="btn btn-blue">Create</a>
+                            {% else %}
+                                <span class="btn btn-gray">Completed</span>
+                            {% endif %}
+                        {% elif document.checklist_done %}
+                            <span class="btn btn-gray">Completed</span>
+                        {% endif %}
+                    </td>
                 </tr>
             {% endfor %}
         </tbody>

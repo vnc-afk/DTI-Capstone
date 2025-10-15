@@ -2,7 +2,7 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse_lazy
 
-from ..mixins.permissions_mixins import PreventAdminFormPostRequestMixin
+from ..mixins.permissions_mixins import StaffOnlyMixin
 from ..mixins.context_mixins import PreviewContextMixin
 from ..mixins.form_mixins import FormStepsMixin, FormSubmissionMixin, FormsetMixin, MessagesMixin
 from ..mixins.service_mixins import ServiceCategoryMixin
@@ -50,7 +50,6 @@ class BaseCreateView(
     FormSubmissionMixin,
     FormStepsMixin,
     FormsetMixin,
-    PreventAdminFormPostRequestMixin,
     CreateView
 ):
     def post(self, request, *args, **kwargs):
@@ -151,7 +150,7 @@ class CreateServiceRepairAccreditationApplicationView(BaseCreateView):
         return reverse_lazy('service-repair-accreditation', kwargs={'pk': self.object.pk})
 
 
-class CreateInspectionValidationReportView(BaseCreateView, ServiceCategoryMixin):
+class CreateInspectionValidationReportView(StaffOnlyMixin, BaseCreateView, ServiceCategoryMixin):
     model = InspectionValidationReport
     template_name = 'documents/create_templates/create_inspection_validation_report.html'
     form_class = InspectionValidationReportForm
@@ -169,7 +168,7 @@ class CreateInspectionValidationReportView(BaseCreateView, ServiceCategoryMixin)
         return reverse_lazy('inspection-validation-report', kwargs={'pk': self.object.pk})
 
 
-class CreateOrderOfPaymentView(BaseCreateView):
+class CreateOrderOfPaymentView(StaffOnlyMixin,BaseCreateView):
     model = OrderOfPayment
     template_name = 'documents/create_templates/create_order_of_payment.html'
     form_class = OrderOfPaymentForm
@@ -180,7 +179,7 @@ class CreateOrderOfPaymentView(BaseCreateView):
         return reverse_lazy('order-of-payment', kwargs={'pk': self.object.pk})
 
 
-class CreateChecklistEvaluationSheetView(BaseCreateView):
+class CreateChecklistEvaluationSheetView(StaffOnlyMixin,BaseCreateView):
     model = ChecklistEvaluationSheet
     template_name = 'documents/create_templates/create_checklist_evaluation_sheet.html'
     form_class = ChecklistEvaluationSheetForm

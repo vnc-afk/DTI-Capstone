@@ -59,3 +59,9 @@ class PreventAdminFormPostRequestMixin:
             messages.error(request, "Admins are not allowed to access this page.")
             return redirect(request.META.get('HTTP_REFERER', '/'))
         return super().dispatch(request, *args, **kwargs)
+    
+class StaffOnlyMixin:
+    def dispatch(self, request, *args, **kwargs):
+        if not request.user.is_staff:  # only staff/admin can access
+            return HttpResponseForbidden("Only staff can create this document.")
+        return super().dispatch(request, *args, **kwargs)    
