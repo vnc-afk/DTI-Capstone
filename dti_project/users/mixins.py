@@ -2,6 +2,8 @@ from django.contrib import messages
 from django.http import JsonResponse
 from django.template.loader import render_to_string
 
+
+
 class FormSubmissionMixin:
     def form_invalid(self, form):
         print("=== FORM_INVALID CALLED ===")

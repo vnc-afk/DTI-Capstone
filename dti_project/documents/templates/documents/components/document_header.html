@@ -4,8 +4,8 @@
         <h1>{{ obj }}</h1>
     </div>
     <div class="actions">
-        {% if update_url_name and object.status == 'draft' and object.user == user %}
-            <a href="{% url update_url_name object.id %}">
+        {% if object.status == 'draft' and object.user == user %}
+            <a href="{{ object.get_update_url }}">
                 <i class="fa-solid fa-pen-to-square"></i>
             </a>
         {% endif %}

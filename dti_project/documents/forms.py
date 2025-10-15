@@ -25,6 +25,7 @@ class BaseCustomForm(forms.ModelForm):
         # --- Field formatting ---
         if hasattr(self, 'fields'):
             for name, field in self.fields.items():
+
                 label_text = field.label if field.label else name.replace('_', ' ').title()
                 if field.required:
                     field.label = f"{label_text} <span class='required-label'>*</span>"
@@ -51,6 +52,11 @@ class BaseCustomForm(forms.ModelForm):
                     'mobile_number',
                     'fax_number',
                     'telephone_number',
+                    'zip_code',
+                ]
+
+                future_only_dates = [
+                    'promo_period_end',
                 ]
                 if name in numerical_fields:
                     field.widget.attrs.update({
@@ -62,10 +68,36 @@ class BaseCustomForm(forms.ModelForm):
                 if name in ['contact_number', 'mobile_number']:
                     field.validators.append(self.validate_contact_number)
                     field.widget.attrs['maxlength'] = 11
+                    field.widget.attrs['placeholder'] = 'Enter Mobile Number (11 digits)'
 
                 if name == 'date_of_birth':
-                    field.validators.append(self.validate_date_of_birth)
+                    field.validators.append(self.generate_date_not_in_future_validator("Date of Birth"))
                     field.widget.attrs['max'] = date.today().isoformat()
+                    field.widget.attrs['placeholder'] = 'Enter Date of Birth'
+
+                if name == 'date_established':
+                    field.validators.append(self.generate_date_not_in_future_validator("Date Established"))
+                    field.widget.attrs['max'] = date.today().isoformat()
+                    field.widget.attrs['placeholder'] = 'Enter Date Established'
+
+                if name == 'telephone_number':
+                    field.validators.append(self.validate_telephone_number)
+                    field.widget.attrs['maxlength'] = 10
+                    field.widget.attrs['placeholder'] = 'Enter Telephone Number (10 digits)'
+
+                if name == 'zip_code':
+                    field.validators.append(self.validate_zip_code)
+                    field.widget.attrs['maxlength'] = 4
+                    field.widget.attrs['placeholder'] = 'Enter Zip Code (4 digits)'
+
+                if name == 'tax_identification_number':
+                    field.validators.append(self.validate_tax_identification_number)
+                    field.widget.attrs['maxlength'] = 12
+                    field.widget.attrs['placeholder'] = 'Enter Tax Identification Number (9 to 12 digits)'
+
+                if name in future_only_dates:
+                    field.validators.append(self.generate_date_not_in_past_validator('Promo Period End'))
+                    field.widget.attrs['min'] = date.today().isoformat()  # prevents past dates in the browser
 
         # --- Auto-fill user fields ---
         if user:
@@ -98,11 +130,29 @@ class BaseCustomForm(forms.ModelForm):
         if not re.fullmatch(r'\d{11}', str(value)):
             raise forms.ValidationError("Contact/Mobile number must be exactly 11 digits.")
         
-    def validate_date_of_birth(self, value):
-        if value > date.today():
-            raise forms.ValidationError('Date of birth cannot be in the future.')
+    def validate_telephone_number(self, value):
+        if not re.fullmatch(r'\d{10}', str(value)):
+            raise forms.ValidationError("Telephone number must be exactly 10 digits.")
+        
+    def validate_zip_code(self, value):
+        if not re.fullmatch(r'\d{4}', str(value)):
+            raise forms.ValidationError("Zip code number must be exactly 4 digits.")
+        
+    def validate_tax_identification_number(self, value):
+        if not re.fullmatch(r'\d{9,12}', str(value)):
+            raise forms.ValidationError("Tax Identification Number must be between 9 to 12 digits.")
+        
+    def generate_date_not_in_future_validator(self, field_label):
+        def validator(value):
+            if value > date.today():
+                raise forms.ValidationError(f'{field_label} cannot be in the future.')
+        return validator
 
-
+    def generate_date_not_in_past_validator(self, field_label):
+        def validator(value):
+            if value < date.today():
+                raise forms.ValidationError(f'{field_label} cannot be in the past.')
+        return validator
 
 
 class SalesPromotionPermitApplicationForm(BaseCustomForm):

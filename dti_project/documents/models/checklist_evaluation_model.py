@@ -145,3 +145,6 @@ class ChecklistEvaluationSheet(DraftModel, models.Model):
     
     def get_absolute_url(self):
         return reverse("checklist-evaluation-sheet", args=[self.pk])
+    
+    def get_update_url(self):
+        return reverse("update-checklist-evaluation-sheet", args=[self.pk])

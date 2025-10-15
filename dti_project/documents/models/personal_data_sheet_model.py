@@ -46,6 +46,9 @@ class PersonalDataSheet(DraftModel, models.Model):
     def get_absolute_url(self):
         return reverse("personal-data-sheet", args=[self.pk])
     
+    def get_update_url(self):
+        return reverse("update-personal-data-sheet", args=[self.pk])
+    
 class EmployeeBackground(PeriodModel):
     personal_data_sheet = models.ForeignKey(PersonalDataSheet, related_name='employee_backgrounds', on_delete=models.CASCADE)
     employer = models.CharField(max_length=255)

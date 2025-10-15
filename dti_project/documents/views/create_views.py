@@ -1,8 +1,7 @@
 from django.contrib import messages
 from django.http import JsonResponse
 from django.urls import reverse_lazy
-
-from ..mixins.permissions_mixins import PreventAdminFormPostRequestMixin
+from ..mixins.permissions_mixins import PreventAdminFormPostRequestMixin, RoleFormPageRestrictionMixin
 from ..mixins.context_mixins import PreviewContextMixin
 from ..mixins.form_mixins import FormStepsMixin, FormSubmissionMixin, FormsetMixin, MessagesMixin
 from ..mixins.service_mixins import ServiceCategoryMixin
@@ -51,6 +50,7 @@ class BaseCreateView(
     FormStepsMixin,
     FormsetMixin,
     PreventAdminFormPostRequestMixin,
+    RoleFormPageRestrictionMixin,
     CreateView
 ):
     def post(self, request, *args, **kwargs):
@@ -102,6 +102,7 @@ class CreateSalesPromotionView(BaseCreateView):
     FIELD_GROUPS = SALES_PROMOTION_FIELD_GROUPS
     detail_groups = SALES_PROMOTION_DETAIL_GROUPS
     additional_sections = ['coverage']
+    allowed_roles = ['business_owner']
 
     def get_success_url(self):
         return reverse_lazy('sales-promotion-application', kwargs={'pk': self.object.pk})
@@ -111,6 +112,8 @@ class CreatePersonalDataSheetView(BaseCreateView):
     template_name = 'documents/create_templates/create_personal_data_sheet.html'
     model = PersonalDataSheet
     form_class = PersonalDataSheetForm
+    allowed_roles = ['business_owner']
+
     formset_classes = {
         'employee_background': FORMSET_CLASSES['employee_background'],
         'trainings_attended': FORMSET_CLASSES['trainings_attended'],
@@ -137,6 +140,7 @@ class CreateServiceRepairAccreditationApplicationView(BaseCreateView):
     form_class = ServiceRepairAccreditationApplicationForm
     FIELD_GROUPS = SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS
     detail_groups = SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
+    allowed_roles = ['business_owner']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -158,6 +162,7 @@ class CreateInspectionValidationReportView(BaseCreateView, ServiceCategoryMixin)
     FIELD_GROUPS = INSPECTION_VALIDATION_REPORT_FIELD_GROUPS
     detail_groups = INSPECTION_VALIDATION_DETAIL_GROUPS
     additional_sections = ['service_categories']
+    allowed_roles = ['collection_agent']
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -175,6 +180,7 @@ class CreateOrderOfPaymentView(BaseCreateView):
     form_class = OrderOfPaymentForm
     FIELD_GROUPS = ORDER_OF_PAYMENT_FIELD_GROUPS
     detail_groups = ORDER_OF_PAYMENT_DETAIL_GROUPS
+    allowed_roles = ['collection_agent']
 
     def get_success_url(self):
         return reverse_lazy('order-of-payment', kwargs={'pk': self.object.pk})
@@ -186,6 +192,7 @@ class CreateChecklistEvaluationSheetView(BaseCreateView):
     form_class = ChecklistEvaluationSheetForm
     FIELD_GROUPS = CHECKLIST_EVALUATION_FIELD_GROUPS
     detail_groups = CHECKLIST_EVALUATION_DETAIL_GROUPS
-
+    allowed_roles = ['collection_agent']
+    
     def get_success_url(self):
         return reverse_lazy('checklist-evaluation-sheet', kwargs={'pk': self.object.pk})

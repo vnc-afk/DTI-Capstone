@@ -25,12 +25,15 @@
                             <i class="fa-solid fa-angle-down"></i>
                         </button>
                         <div class="nav-dropdown-list">
-                            <a href="{% url 'create-sales-promotion' %}">Sales Promotion Application</a>
-                            <a href="{% url 'create-personal-data-sheet' %}">Personal Data Sheet</a>
-                            <a href="{% url 'create-service-repair-accreditation' %}">Service and Repair Accreditation</a>
-                            <a href="{% url 'create-inspection-validation-report' %}">Inspection Validation Report</a>
-                            <a href="{% url 'create-order-of-payment' %}">Order of Payment</a>
-                            <a href="{% url 'create-checklist-evaluation-sheet' %}">Requirement Checklist</a>
+                            {% if user.role == 'business_owner' %}
+                                <a href="{% url 'create-sales-promotion' %}">Sales Promotion Application</a>
+                                <a href="{% url 'create-personal-data-sheet' %}">Personal Data Sheet</a>
+                                <a href="{% url 'create-service-repair-accreditation' %}">Service and Repair Accreditation</a>
+                               {% elif user.role == 'collection_agent' %}
+                                <a href="{% url 'create-inspection-validation-report' %}">Inspection Validation Report</a>
+                                <a href="{% url 'create-order-of-payment' %}">Order of Payment</a>
+                                <a href="{% url 'create-checklist-evaluation-sheet' %}">Requirement Checklist</a>
+                            {% endif %}
                         </div>
                     </li>
                 {% endif %}
@@ -42,7 +45,6 @@
                     </button>
                     <div class="nav-dropdown-list">
                         <a href="{% url 'all-documents' %}">
-                            <i class="fa-solid fa-file"></i>
                             <span>All Documents</span>
                         </a>
                     </div>

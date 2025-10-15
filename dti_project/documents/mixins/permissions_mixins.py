@@ -59,3 +59,12 @@ class PreventAdminFormPostRequestMixin:
             messages.error(request, "Admins are not allowed to access this page.")
             return redirect(request.META.get('HTTP_REFERER', '/'))
         return super().dispatch(request, *args, **kwargs)
+    
+class RoleFormPageRestrictionMixin:
+    allowed_roles = []  # Define allowed roles per view
+    
+    def dispatch(self, request, *args, **kwargs):
+        if request.user.role not in self.allowed_roles:
+            messages.error(request, f"{request.user.role.replace('_', ' ').title()}s are not allowed to access this page.")
+            return redirect(request.META.get('HTTP_REFERER', '/'))
+        return super().dispatch(request, *args, **kwargs)

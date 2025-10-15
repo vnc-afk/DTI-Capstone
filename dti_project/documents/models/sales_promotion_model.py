@@ -49,6 +49,9 @@ class SalesPromotionPermitApplication(DraftModel, BaseApplication):
 
     def get_absolute_url(self):
         return reverse("sales-promotion-application", args=[self.pk])
+
+    def get_update_url(self):
+        return reverse("update-sales-promotion", args=[self.pk])
     
 class ProductCovered(models.Model):
     permit_application = models.ForeignKey(SalesPromotionPermitApplication, related_name='products', on_delete=models.CASCADE)

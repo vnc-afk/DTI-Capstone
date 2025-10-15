@@ -95,6 +95,9 @@ class InspectionValidationReport(DraftModel, models.Model):
     
     def get_absolute_url(self):
         return reverse("inspection-validation-report", args=[self.pk])
+    
+    def get_update_url(self):
+        return reverse("update-inspection-validation-report", args=[self.pk])
         
     def get_recommendation_display(self):
         """Return a human-readable list of selected recommendations"""
