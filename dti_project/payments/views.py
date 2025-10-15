@@ -2,67 +2,33 @@ from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import GCashPaymentForm
 from documents.models import ServiceRepairAccreditationApplication
-from documents.models import SalesPromotionPermitApplication
-from decimal import Decimal
-from documents.models import OrderOfPayment
-
-def payment_page(request, document_type, document_id):
-    """
-    Display payment page for a document.
-    Only allows payment if an Order of Payment (OOP) has been created by admin.
-    """
-
-    # Fetch the document
-    if document_type == "sales-promo":
-        doc = get_object_or_404(SalesPromotionPermitApplication, pk=document_id)
-        business_name = doc.sponsor_name
-        scope = doc.coverage
-        registration_type = "Sales Promotion Permit"
-        transaction_type = "Application"
-        applicant_name = doc.sponsor_authorized_rep
-
-    elif document_type == "service-repair":
-        doc = get_object_or_404(ServiceRepairAccreditationApplication, pk=document_id)
-        business_name = doc.name_of_business
-        scope = doc.region
-        registration_type = doc.form_of_organization
-        transaction_type = doc.application_type
-        applicant_name = f"{doc.first_name} {doc.last_name}"
-
-    else:
-        messages.error(request, "Invalid document type.")
-        return redirect("dashboard")
-
-    # Fetch the existing Order of Payment created by admin
-    try:
-        oop = OrderOfPayment.objects.get(user=request.user, name=business_name)
-    except OrderOfPayment.DoesNotExist:
-        messages.error(request, "The Order of Payment has not been created yet. Please contact the admin.")
-        return redirect("dashboard")
-    except OrderOfPayment.MultipleObjectsReturned:
-        messages.error(request, "Multiple Orders of Payment found. Please contact the admin.")
-        return redirect("dashboard")
-
-    # Fees
-    processing_fee = Decimal('500.00')
-    doc_stamp_fee = Decimal(oop.doc_stamp_amount) if oop.doc_stamp_amount else Decimal('0.00')
-    total_amount = processing_fee + doc_stamp_fee
-
-    context = {
-        "business_name": business_name,
-        "scope": scope,
-        "registration_type": registration_type,
-        "transaction_type": transaction_type,
-        "applicant_name": applicant_name,
-        "citizenship": "Filipino",
-        "processing_fee": processing_fee,
-        "doc_stamp_fee": doc_stamp_fee,
-        "total_amount": total_amount,
-    }
-
-    return render(request, "payments/payment-page.html", context)
 
 
+def payment_page(request):
+    user = request.user  # Current logged-in user
+
+    # Get the most recent accreditation for this user
+    accreditation = get_object_or_404(ServiceRepairAccreditationApplication, user=user)
+
+    if request.method == 'POST':
+        if 'proceed' in request.POST:
+            payment_method = request.POST.get('payment_method')
+            total = 530  # Or calculate dynamically
+
+            if payment_method == 'gcash':
+                request.session['total'] = total
+                return redirect('gcash_payment')  # Redirect to GCash page
+
+            elif payment_method == 'over-the-counter':
+                messages.info(request, "Over-the-counter payment not implemented yet.")
+                return redirect('payment_page')
+
+        elif 'resume' in request.POST:
+            messages.info(request, "You can resume later!")
+            return redirect('payment_page')
+
+    # GET request: render page with accreditation data
+    return render(request, 'payments/payment-page.html', {"accreditation": accreditation})
 
 
 def gcash_payment(request):

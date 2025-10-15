@@ -104,9 +104,8 @@ class ServiceRepairAccreditationApplication(DraftModel, models.Model):
         null=True
     )
     
-    inspection_done = models.BooleanField(default=False)
-    opp_done = models.BooleanField(default=False)
-    checklist_done = models.BooleanField(default=False)
+    
+
     def __str__(self):
         return self.get_str_display(f"{self.name_of_business} - {self.application_type} - {self.category}")
 

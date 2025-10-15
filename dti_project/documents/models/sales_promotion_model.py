@@ -44,10 +44,6 @@ class SalesPromotionPermitApplication(DraftModel, BaseApplication):
     single_province = models.CharField(max_length=255, blank=True)
     cities_or_municipalities_covered = models.TextField(blank=True)
 
-    inspection_done = models.BooleanField(default=False)
-    opp_done = models.BooleanField(default=False)
-    checklist_done = models.BooleanField(default=False)
-    
     def __str__(self):
         return self.get_str_display(self.promo_title)
 

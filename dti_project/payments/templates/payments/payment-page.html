@@ -6,100 +6,74 @@
         <h1>Payment Page</h1>
     </div>
 
-    <form method="post" enctype="multipart/form-data">
+    <form method="post">
         {% csrf_token %}
 
-        <!-- ============================= -->
-        <!-- BUSINESS INFORMATION SECTION -->
-        <!-- ============================= -->
+        <!-- Business Information -->
         <div class="card">
             <div class="card-header">Business Information</div>
             <div class="card-body">
                 <div class="form-group">
                     <label>Business Name</label>
-                    <input type="text" name="business_name" value="{{ business_name }}" readonly>
-                </div>
-
-                <div class="form-group">
-                    <label>Scope</label>
-                    <input type="text" name="scope" value="{{ scope }}" readonly>
+                    <input type="text" name="business_name" value="{{ accreditation.name_of_business }}" readonly>
                 </div>
 
                 <div class="form-group">
                     <label>Registration Type</label>
-                    <input type="text" name="registration_type" value="{{ registration_type }}" readonly>
+                    <input type="text" name="registration_type" value="{{ accreditation.category }}" readonly>
                 </div>
 
                 <div class="form-group">
                     <label>Transaction Type</label>
-                    <input type="text" name="transaction_type" value="{{ transaction_type }}" readonly>
+                    <input type="text" name="transaction_type" value="{{ accreditation.application_type }}" readonly>
                 </div>
             </div>
         </div>
 
-        <!-- ============================= -->
-        <!-- PAYMENT DETAILS SECTION -->
-        <!-- ============================= -->
+        <!-- Payment Details -->
         <div class="card">
             <div class="card-header">Payment Details</div>
             <div class="card-body">
                 <div class="form-group">
-                    <label>Process Payment for Reference Code</label>
-                    <input type="text" name="applicant_name" 
-                        >
-                </div>
-                <div class="form-group">
                     <label>Applicant Name</label>
-                    <input type="text" name="applicant_name" value="{{ applicant_name }}" readonly>
+                    <input type="text" name="applicant_name" value="{{ accreditation.full_name }}" readonly>
                 </div>
 
                 <div class="form-group">
                     <label>Citizenship</label>
-                    <input type="text" name="citizenship" value="{{ citizenship }}" readonly>
+                    <input type="text" name="citizenship">
                 </div>
 
-                <!-- Fees populated from Order of Payment -->
                 <div class="form-group">
                     <label>Processing Fee</label>
-                    <input type="text" name="processing_fee" value="{{ processing_fee }}" readonly>
+                    <input type="text" value="₱500.00" readonly>
                 </div>
 
                 <div class="form-group">
                     <label>Documentary Stamp Fee</label>
-                    <input type="text" name="doc_stamp_fee" value="{{ doc_stamp_fee }}" readonly>
+                    <input type="text" value="₱30.00" readonly>
                 </div>
 
-                <!-- Total Computation -->
-                
-                <div class="form-group">
-                    <label><strong>Total Amount</strong></label>
-                    <input type="text" name="total_amount" value="{{ total_amount }}" readonly>
-                </div>
-
-
-                <!-- ============================= -->
-                <!-- PAYMENT METHOD -->
-                <!-- ============================= -->
                 <div class="form-group">
                     <label>Payment Method</label>
-                    <div>
+                    <div class="radio-group">
                         <label>
-                            <input type="radio" name="payment_method" value="gcash" required> GCash
+                            <input type="radio" name="payment_method" value="gcash">
+                            GCash
                         </label>
                         <label>
-                            <input type="radio" name="payment_method" value="over-the-counter" required> Over the Counter
+                            <input type="radio" name="payment_method" value="over-the-counter">
+                            Over the counter
                         </label>
                     </div>
                 </div>
 
+                <div class="total">Total Amount = ₱530.00</div>
+            </div>
 
-                <!-- ============================= -->
-                <!-- ACTION BUTTONS -->
-                <!-- ============================= -->
-                <div class="form-group">
-                    <button type="submit" name="resume" value="true">Resume Later</button>
-                    <button type="submit" name="proceed" value="true">Proceed Payment</button>
-                </div>
+            <div class="buttons-payment">
+                <button type="submit" name="resume" class="btn btn-green">Resume Later</button>
+                <button type="submit" name="proceed" class="btn btn-blue">Proceed Payment</button>
             </div>
         </div>
     </form>
