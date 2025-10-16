@@ -17,7 +17,7 @@ class ChecklistEvaluationSheet(DraftModel, models.Model):
     type_of_application = models.CharField(max_length=50, choices=[('New', 'New'), ('Renewal', 'Renewal')])
     renewal_due_date = models.DateField(null=True, blank=True, help_text='Date Expired: Dec 31')
     star_rating = models.PositiveSmallIntegerField(choices=STAR_RATING_CHOICES, validators=[MinValueValidator(1), MaxValueValidator(5)])
-    date = models.DateField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now)
 
 
     req_application_form = models.BooleanField(

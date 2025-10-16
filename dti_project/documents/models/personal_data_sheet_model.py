@@ -25,7 +25,7 @@ class PersonalDataSheet(DraftModel, models.Model):
         verbose_name = "Personal Data Sheet"
         verbose_name_plural = "Personal Data Sheets"
 
-    date = models.DateField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now)
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     first_name = models.CharField(max_length=50)
     middle_name = models.CharField(max_length=50, blank=True, null=True)

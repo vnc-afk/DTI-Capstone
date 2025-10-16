@@ -134,13 +134,9 @@ class ExportDocumentsExcelView(LoginRequiredMixin, View):
         return response
 
 class UploadExcelView(View):
-    template_name = "documents/excel_templates/excel_upload.html"
-
-    def get(self, request, *args, **kwargs):
-        return render(request, self.template_name)
-
     def post(self, request, *args, **kwargs):
         files = request.FILES.getlist("files")
+        
         if not files:
             messages.error(request, "No files were uploaded. Please select an Excel file to continue.")
             return HttpResponseRedirect(reverse("documents:all-documents"))
@@ -159,6 +155,11 @@ class UploadExcelView(View):
             }
 
             ext = os.path.splitext(file.name)[1].lower()
+            # Skip temporary Excel files (those starting with ~$)
+            if file.name.startswith("~$"):
+                messages.error(request, f"Temporary file {file.name} is not a valid Excel file.")
+                continue
+
             if ext not in [".xlsx", ".xls"]:
                 messages.error(request, f"{file.name} was not uploaded. Only Excel files are allowed.")
                 continue

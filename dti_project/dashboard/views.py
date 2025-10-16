@@ -1,7 +1,9 @@
 from django.http import JsonResponse
 from django.views.generic import TemplateView, View
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.db.models import Value, F, Q
+from django.db.models import Value, F, DateTimeField
+from django.db.models.functions import Coalesce
+from django.db.models import Q
 from django.db.models.functions import Concat
 
 from documents.models import (
@@ -33,7 +35,27 @@ class DashboardView(LoginRequiredMixin, UserRoleMixin, TemplateView):
         else:
             qs = model.objects.filter(user=user)
 
-        return qs.only("pk", "id")  # Optimize query
+        # Determine which datetime fields exist
+        available_fields = [f.name for f in model._meta.get_fields()]
+        datetime_fields = []
+        if 'date_filed' in available_fields:
+            datetime_fields.append('date_filed')
+        if 'date' in available_fields:
+            datetime_fields.append('date')
+
+        if len(datetime_fields) >= 2:
+            # Use Coalesce if 2+ fields
+            qs = qs.annotate(
+                sort_date=Coalesce(*datetime_fields, output_field=DateTimeField())
+            ).order_by('-sort_date', '-id')
+        elif len(datetime_fields) == 1:
+            # Only one datetime field exists, order by it directly
+            qs = qs.order_by(f'-{datetime_fields[0]}', '-id')
+        else:
+            # No datetime field exists, fallback to ordering by id
+            qs = qs.order_by('-id')
+
+        return qs.only('pk', 'id')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)

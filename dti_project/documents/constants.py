@@ -42,7 +42,7 @@ SERVICE_REPAIR_ACCREDITATION_FIELD_GROUPS = [
     ("Application Details", [['application_type', 'category', 'star_rating']], 'application-details'),
     ("Business/Personal Information", [
         ['name_of_business'],
-        ['building_name_or_number', 'street_name', 'barangay', 'city_or_municipality', 'province', 'region', 'zip_code'],
+        ['building_name_or_number', 'street_name', 'region', 'province', 'city_or_municipality', 'barangay', 'zip_code'],
         ['email_address', 'mobile_number', 'telephone_number', 'fax_number'],
         ['sex', 'social_classification'] 
     ], 'business-information'),

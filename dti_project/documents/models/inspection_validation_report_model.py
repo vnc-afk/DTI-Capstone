@@ -14,7 +14,7 @@ class InspectionValidationReport(DraftModel, models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name_of_business = models.CharField(max_length=255)
     address = models.TextField()
-    date = models.DateField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now)
     type_of_application_activity = models.CharField(max_length=50, choices=APPLICATION_OR_ACTIVITY_CHOICES)
 
     # Basic Info Section

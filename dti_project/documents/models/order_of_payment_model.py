@@ -13,7 +13,7 @@ class OrderOfPayment(DraftModel, models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
     name = models.CharField(max_length=55)
-    date = models.DateField(default=timezone.now)
+    date = models.DateTimeField(default=timezone.now)
     address = models.TextField(max_length=255)
 
     account_officer_date = models.DateField(null=True, blank=True)

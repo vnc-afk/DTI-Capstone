@@ -1,6 +1,7 @@
 from datetime import date
 import re
 from django import forms
+from locations.models import Barangay, CityMunicipality, Province, Region
 from .utils.form_helpers import create_inline_formset
 from .validators import validate_period
 from .models import CharacterReference, ChecklistEvaluationSheet, EducationalAttainment, EmployeeBackground, InspectionValidationReport, OrderOfPayment, ProductCovered, SalesPromotionPermitApplication, PersonalDataSheet, Service, ServiceCategory, ServiceRepairAccreditationApplication, TrainingsAttended
@@ -232,10 +233,52 @@ class CharacterReferenceForm(BaseCustomForm):
         exclude = ['personal_data_sheet']     
 
 class ServiceRepairAccreditationApplicationForm(BaseCustomForm):
+    region = forms.ModelChoiceField(queryset=Region.objects.none(), required=False)
+    province = forms.ModelChoiceField(queryset=Province.objects.none(), required=False)
+    city_or_municipality = forms.ModelChoiceField(queryset=CityMunicipality.objects.none(), required=False)
+    barangay = forms.ModelChoiceField(queryset=Barangay.objects.none(), required=False)
+
     class Meta:
         model = ServiceRepairAccreditationApplication
         fields = '__all__'
         exclude = ['status', 'user', 'date']
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        # --- REGION ---
+        region_id = self.data.get('region') or (self.instance.region.id if self.instance.pk and self.instance.region else None)
+        if region_id:
+            self.fields['region'].queryset = Region.objects.filter(id=region_id)
+        else:
+            self.fields['region'].queryset = Region.objects.none()
+
+        # --- PROVINCE ---
+        province_id = self.data.get('province') or (self.instance.province.id if self.instance.pk and self.instance.province else None)
+        if province_id:
+            self.fields['province'].queryset = Province.objects.filter(id=province_id)
+        elif region_id:
+            self.fields['province'].queryset = Province.objects.filter(region_id=region_id)
+        else:
+            self.fields['province'].queryset = Province.objects.none()
+
+        # --- CITY / MUNICIPALITY ---
+        city_id = self.data.get('city_or_municipality') or (self.instance.city_or_municipality.id if self.instance.pk and self.instance.city_or_municipality else None)
+        if city_id:
+            self.fields['city_or_municipality'].queryset = CityMunicipality.objects.filter(id=city_id)
+        elif province_id:
+            self.fields['city_or_municipality'].queryset = CityMunicipality.objects.filter(province_id=province_id)
+        else:
+            self.fields['city_or_municipality'].queryset = CityMunicipality.objects.none()
+
+        # --- BARANGAY ---
+        barangay_id = self.data.get('barangay') or (self.instance.barangay.id if self.instance.pk and self.instance.barangay else None)
+        if barangay_id:
+            self.fields['barangay'].queryset = Barangay.objects.filter(id=barangay_id)
+        elif city_id:
+            self.fields['barangay'].queryset = Barangay.objects.filter(city_id=city_id)
+        else:
+            self.fields['barangay'].queryset = Barangay.objects.none()
 
 class InspectionValidationReportForm(BaseCustomForm):
     class Meta:

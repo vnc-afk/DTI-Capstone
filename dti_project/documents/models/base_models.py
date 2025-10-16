@@ -5,7 +5,7 @@ from users.models import User
 
 class BaseApplication(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
-    date_filed = models.DateField(default=timezone.now)
+    date_filed = models.DateTimeField(default=timezone.now)
 
     class Meta:
         abstract = True
