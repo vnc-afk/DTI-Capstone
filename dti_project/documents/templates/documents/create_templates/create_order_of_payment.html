@@ -10,9 +10,12 @@
 
     {% include 'documents/components/document_form_header.html' with title="Order Of Payment Form" %}
 
-    <div class="form-wrapper">
+    <div class="form-wrapper">  
         <form class="documents-form" id="documents-form" action="{% url 'create-order-of-payment' %}" method="POST">
             {% csrf_token %}
+            {% if request.GET.sppa %}
+                <input type="hidden" name="sppa" value="{{ request.GET.sppa }}">
+            {% endif %}
 
             {% for step_info in enumerated_steps %}
                 {% if step_info.1 == 'fieldset' %}
@@ -30,4 +33,5 @@
 
     </div>
 </div>
+{% include 'documents/components/preview_modal.html' with document="Sales Promotion Permit Application" %}
 {% endblock %}

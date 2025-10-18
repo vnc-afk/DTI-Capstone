@@ -29,7 +29,7 @@
                                 <a href="{% url 'create-sales-promotion' %}">Sales Promotion Application</a>
                                 <a href="{% url 'create-personal-data-sheet' %}">Personal Data Sheet</a>
                                 <a href="{% url 'create-service-repair-accreditation' %}">Service and Repair Accreditation</a>
-                               {% elif user.role == 'collection_agent' %}
+                            {% elif user.role == 'collection_agent' %}
                                 <a href="{% url 'create-inspection-validation-report' %}">Inspection Validation Report</a>
                                 <a href="{% url 'create-order-of-payment' %}">Order of Payment</a>
                                 <a href="{% url 'create-checklist-evaluation-sheet' %}">Requirement Checklist</a>
@@ -67,13 +67,6 @@
                 </li>
                 {%endif%}
 
-                <!-- Payment -->
-                <li class="nav-item">
-                    <a href="{% url 'payment-page' %}" class="nav-link">
-                        <i class="fa-solid fa-qrcode"></i>
-                        <span>GCash Payment</span>
-                    </a>
-                </li>
             </ul>
         </section>
 

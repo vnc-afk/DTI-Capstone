@@ -5,22 +5,21 @@
     <table class="documents-table">
         <thead>
             <tr>
-                <th>
-                    <input type="checkbox" id="select-all-checkbox">
-                </th>
+                <th><input type="checkbox" id="select-all-checkbox"></th>
                 <th>Name</th>
                 <th>Document Type</th>
                 <th>User</th>
                 <th>Status</th>
                 <th>Date Created</th>
                 <th>Payment</th>
+                <th>Order of Payment</th>
             </tr>
         </thead>
         <tbody>
             {% for document in documents %}
                 <tr class="document-value-row" data-href="{{ document.get_absolute_url }}">
                     <td>
-                        <input type="checkbox" name="documents" id="" value="{{ document.model_name }}:{{ document.id }}">
+                        <input type="checkbox" name="documents" value="{{ document.model_name }}:{{ document.id }}">
                     </td>
                     <td>{{ document }}</td>
                     <td>{{ document.model_verbose_name|titlecase }}</td>
@@ -39,12 +38,39 @@
                             {{ document.date_filed }}
                         {% endif %}
                     </td>
+
+                    <!-- Payment column -->
                     <td>
-                    {% if document.status == 'approved' %}
-                        <a href="{% url 'payment-page' %}" class="btn btn-green">Pay</a>
-                    {% else %}
-                        <span class="text-muted">N/A</span>
-                    {% endif %}
+                        {% if document.model_verbose_name == 'Sales Promotion Permit Application' %}
+                            {% with document.order_of_payment as oop %}
+                                {% if oop %}
+                                    <a href="{% url 'payment-page' oop.pk %}" class="btn btn-green">Pay</a>
+                                {% else %}
+                                    <span class="text-muted">🔸 Pending for OOP</span>
+                                {% endif %}
+                            {% endwith %}
+                        {% else %}
+                            <span class="text-muted"></span>
+                        {% endif %}
+                    </td>
+
+                    <!-- Order of Payment column -->
+                    <td>
+                        {% if document.model_verbose_name == 'Sales Promotion Permit Application' %}
+                            {% if document.status != 'approved' %}
+                                <span class="text-muted">🔸 Pending for Approval</span>
+                            {% else %}
+                                {% with document.order_of_payment as oop %}
+                                    {% if oop %}
+                                        <a href="{% url 'update-order-of-payment' oop.pk %}" class="btn btn-dark">View OOP</a>
+                                    {% else %}
+                                        <a href="{% url 'create-order-of-payment' %}?sppa={{ document.pk }}" class="btn btn-blue" onclick="event.stopPropagation();">Create OOP</a>
+                                    {% endif %}
+                                {% endwith %}
+                            {% endif %}
+                        {% else %}
+                            <span class="text-muted"></span>
+                        {% endif %}
                     </td>
 
                 </tr>

@@ -303,7 +303,10 @@ class OrderOfPaymentForm(BaseCustomForm):
     class Meta:
         model = OrderOfPayment
         fields = '__all__'
-        exclude = ['status', 'date', 'user']
+        exclude = ['status', 'date', 'user',]
+        widgets = {
+            'sales_promotion_permit_application': forms.HiddenInput(),
+        }
 
 class ChecklistEvaluationSheetForm(BaseCustomForm):
     renewal_year = forms.IntegerField(label="Date Expired: Dec 31, ____", min_value=1900)

@@ -1,5 +1,7 @@
 from django.db import models
 from django.urls import reverse
+
+from .order_of_payment_model import OrderOfPayment 
 from ..models.base_models import BaseApplication, DraftModel
 from django.utils import timezone
 from users.models import User
