@@ -19,6 +19,8 @@ from reportlab.lib.pagesizes import A4
 from notifications.models import Notification
 from django.contrib.contenttypes.models import ContentType
 from documents.models import SalesPromotionPermitApplication, OrderOfPayment, ServiceRepairAccreditationApplication
+from documents.models.collection_models import CollectionReport, CollectionReportItem
+from django.utils import timezone
 
 
 def _get_doc_objects(doc_type, pk):
@@ -119,14 +121,20 @@ def payment_page(request, doc_type, pk):
 
 def payment_success(request, doc_type, pk):
     """
-    Generic payment success callback. Marks Paid and notifies admins + owner.
+    Generic payment success callback. Marks Paid, logs to collection report,
+    and notifies admins + owner.
     """
+
+
     try:
         ctx = _get_doc_objects(doc_type, pk)
     except ValueError:
         messages.error(request, "Invalid payment target.")
         return redirect('documents-list')
 
+    # ----------------------------------------------------------
+    # Mark as PAID (but not VERIFIED)
+    # ----------------------------------------------------------
     if ctx["type"] == "oop":
         oop = ctx["oop"]
         if oop.payment_status != OrderOfPayment.PaymentStatus.VERIFIED:
@@ -135,6 +143,7 @@ def payment_success(request, doc_type, pk):
         target_obj = oop
         owner = ctx["user"]
         display_id = oop.pk
+
     else:
         sra = ctx["sra"]
         if sra.payment_status != ServiceRepairAccreditationApplication.PaymentStatus.VERIFIED:
@@ -144,6 +153,41 @@ def payment_success(request, doc_type, pk):
         owner = ctx["user"]
         display_id = sra.pk
 
+    # ----------------------------------------------------------
+    #  CREATE COLLECTION REPORT ITEM AFTER PAYMENT SUCCESS  
+    # ----------------------------------------------------------
+    today = timezone.now().date()
+
+    # 1️⃣ Get or create today's collection report
+    report, created = CollectionReport.objects.get_or_create(
+        report_collection_date=today,
+        defaults={
+            "dti_office": "DTI Office",  # optional default field
+            "report_no": f"RPT-{today.strftime('%Y%m%d')}",
+        }
+    )
+
+    # 2️⃣ Prepare values for CollectionReportItem
+    payor = owner.get_full_name()
+    particulars = ctx["display_name"]  # "Sales Promotion Permit" OR "Service Repair Accreditation"
+    amount = ctx["total_amount"]
+    stamp_tax = ctx["doc_stamp_fee"] or 0
+
+    # 3️⃣ Create the CollectionReportItem
+    item = CollectionReportItem.objects.create(
+        payor=payor,
+        particulars=particulars,
+        amount=amount,
+        stamp_tax=stamp_tax,
+    )
+
+    # 4️⃣ Add item to report
+    report.report_items.add(item)
+    report.save()
+
+    # ----------------------------------------------------------
+    # SEND NOTIFICATIONS
+    # ----------------------------------------------------------
     admins = User.objects.filter(role__in=["admin", "collection_agent"])
     for admin in admins:
         notification = Notification.objects.create(
@@ -166,7 +210,11 @@ def payment_success(request, doc_type, pk):
     )
     send_user_notification(owner.id, notification)
 
+    # ----------------------------------------------------------
+    # RETURN SUCCESS PAGE
+    # ----------------------------------------------------------
     return render(request, "payments/payment_success.html", {"application": target_obj})
+
 
 def payment_failed(request):
     messages.error(request, "Payment failed or was canceled. Please try again.")
@@ -262,7 +310,7 @@ def download_receipt(request, doc_type, pk):
         # AMOUNTS
         y = height - 235
         p.setFont("Helvetica-Bold", 10)
-        p.drawString(50, y, "Fee Description")
+        p.drawString(50, y, "Fee Descriptionasdasd")
         p.drawString(300, y, "Amount (₱)")
         p.line(50, y - 2, 550, y - 2)
 
