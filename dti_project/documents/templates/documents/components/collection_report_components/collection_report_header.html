@@ -1,9 +1,13 @@
 <header class="documents-table-header">
     <h3>All Report Items</h3>
     <div class="actions">
-        <!-- <button id="export-excel-btn" formaction="{% url 'export-to-excel' %}">
-            Export as Excel file
-        </button> -->
+        <a  href="{% url 'export_collections' %}" ><button type="submit" form="documents-table-form" id="export-to-excel-btn">
+               Export to Excel
+        </button>
+        </a>
+        <!-- <a href="{% url 'export_collections' %}" id="export-to-excel-btn" class="btn">
+            Export to Excel
+        </a> -->
         <button id="filter-btn">
             <i class="fas fa-sliders-h"></i>
         </button>

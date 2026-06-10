@@ -11,6 +11,7 @@ urlpatterns = [
 
     # Profile Detail View
     path('profile/<int:pk>/', views.ProfileDetailView.as_view(), name='profile'),
+
     # Profile Edit View
     path("settings/<int:pk>/profile-edit/", views.ProfileEditView.as_view(), name="profile_edit"),
     # Settings page
@@ -27,6 +28,11 @@ urlpatterns = [
     #Forgot Password
     path('forgot-password/', views.ForgotPasswordView.as_view(), name='forgot_password'),
     path('reset-password/', views.ResetPasswordView.as_view(), name='reset_password'),
+
+    # Verify Account (Unverified Owner)
+    path('settings/verify-account/<int:pk>/', views.VerifyUserView.as_view(), name='verify_account'),
+    path('verify-user/<int:user_id>/', views.verify_user, name='verify_user'),
+    path('settings/verify-account/<int:user_id>/upload/', views.verify_account_upload, name='verify_account_upload'),
 
 
 

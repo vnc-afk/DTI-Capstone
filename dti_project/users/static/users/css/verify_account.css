@@ -1,0 +1,89 @@
+/* Popup Box Styling (like add_staff / dropbox) */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    overflow-y: auto;
+}
+
+.popup-overlay.active {
+    display: flex;
+}
+
+.popup-box {
+    background: #fff;
+    border-radius: 12px;
+    padding: 25px 30px;
+    max-width: 600px;
+    width: 90%;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Document grid inside popup */
+.verification-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-top: 15px;
+}
+
+/* Individual document box */
+.verification-grid div {
+    border: 2px dashed #7a7a7a;
+    border-radius: 10px;
+    padding: 10px;
+    text-align: center;
+    width: 120px;
+    height: 140px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background: #fdfdfd;
+    transition: background 0.2s, border-color 0.3s;
+}
+
+.verification-grid div:hover {
+    background: #f3f3f3;
+    border-color: #007bff;
+}
+
+.doc-thumb {
+    max-width: 80px;
+    max-height: 80px;
+    object-fit: cover;
+    border-radius: 4px;
+    margin-bottom: 5px;
+}
+
+.doc-info {
+    font-size: 13px;
+    color: #555;
+    text-align: center;
+}
+
+.popup-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Fade in */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(15px);}
+    to { opacity: 1; transform: translateY(0);}
+}
+
+/* Buttons inside popup */
+.popup-buttons .btn {
+    min-width: 90px;
+}

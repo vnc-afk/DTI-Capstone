@@ -17,35 +17,49 @@
         <div class="profile-header-content">
             <div class="profile-picture-wrapper">
                 {% if user.profile_picture %}
-                <img src="{{ user.profile_picture.url }}" alt="{{ user.username }}" class="profile-picture">
+                    <img src="{{ user.profile_picture.url }}" class="profile-picture">
                 {% else %}
-                <div class="profile-avatar">{{ user.get_full_name|slice:":1" }}</div>
+                    <div class="profile-avatar">{{ user.get_full_name|slice:":1" }}</div>
                 {% endif %}
             </div>
+
             <div class="profile-info">
                 <h1 class="profile-name">{{ user.get_full_name }}</h1>
                 <p class="profile-username">@{{ user.username }}</p>
-                <span class="role-badge role-{{ user.role }}">
-                    {{ user.get_role_display }}
-                </span>
+                <span class="role-badge role-{{ user.role }}">{{ user.role|title }}</span>
             </div>
         </div>
 
-        <!-- Settings Options -->
+        <!-- BODY -->
         <div class="settings-body">
             <h2>Account Settings</h2>
+
             <ul class="settings-list">
                 <div class="button-group">
-                    <li>
-                        <a href="{% url 'profile_edit' user.pk %}" class="btn btn-primary">
-                            <i class="fas fa-user-edit"></i> Edit Profile
-                        </a>
+
+                    <li><a href="{% url 'profile_edit' user.pk %}" class="btn btn-primary">
+                        <i class="fas fa-user-edit"></i> Edit Profile</a>
                     </li>
-                    <li>
-                        <a href="#" class="btn btn-secondary disabled">
-                            <i class="fas fa-shield-alt"></i> Privacy Settings (Coming Soon)
-                        </a>
-                    </li>
+
+                    {% if user.role == 'unverified_owner' %}
+
+                        {% if has_pending_verification %}
+                            <li><button class="btn btn-warning" disabled>
+                                <i class="fas fa-hourglass-half"></i> Pending Verification
+                            </button></li>
+
+                        {% else %}
+                            <li>
+                                <button id="openVerifyPopup" class="btn btn-primary">
+                                    <i class="fas fa-shield-alt"></i> Verify Account
+                                </button>
+                            </li>
+                        {% endif %}
+
+                    {% else %}
+                        <li><a class="btn btn-secondary disabled">
+                            <i class="fas fa-shield-alt"></i> Verified</a></li>
+                    {% endif %}
                 </div>
             </ul>
         </div>
@@ -115,4 +129,91 @@
 
     </div>
 </div>
+
+<div id="verifyPopup" class="popup-overlay">
+    <div class="popup-box">
+        <h2>Verify Your Account</h2>
+        <p>Upload DTI certification and ID to verify your account (e.g., certificate of registration and any valid ID).</p>
+        <p class="note">Note: This takes 2 or more uploads, if necessary.</p>
+
+        <form id="verifyForm" method="POST" action="{% url 'verify_account_upload' user.pk %}" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <!-- Dropbox -->
+            <div id="dropBox">
+                <p>Click or drag files here</p>
+                <input type="file" name="files" multiple accept=".jpg,.jpeg,.png,.pdf">
+            </div>
+
+            <ul id="uploadedFiles"></ul>
+        </form>
+
+        <div class="popup-buttons">
+            <button id="closeVerifyPopup" class="btn btn-danger">Cancel</button>
+            <button class="btn btn-success" form="verifyForm">Send</button>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+const popup = document.getElementById('verifyPopup');
+const closeBtn = document.getElementById('closeVerifyPopup');
+const dropBox = document.getElementById('dropBox');
+const fileInput = dropBox.querySelector('input[type="file"]');
+const uploadedFiles = document.getElementById('uploadedFiles');
+
+// Open popup button
+const openBtn = document.getElementById('openVerifyPopup');
+if (openBtn) {
+    openBtn.addEventListener('click', () => {
+        popup.classList.add('active');
+    });
+}
+
+// Close popup
+closeBtn.addEventListener('click', () => {
+    popup.classList.remove('active');
+    uploadedFiles.innerHTML = '';
+    fileInput.value = '';
+});
+
+// Click dropbox to open file dialog
+dropBox.addEventListener('click', () => fileInput.click());
+
+// Drag & drop events
+dropBox.addEventListener('dragover', e => {
+    e.preventDefault();
+    dropBox.classList.add('dragover');
+});
+dropBox.addEventListener('dragleave', () => dropBox.classList.remove('dragover'));
+dropBox.addEventListener('drop', e => {
+    e.preventDefault();
+    dropBox.classList.remove('dragover');
+
+    const files = Array.from(e.dataTransfer.files);
+    fileInput.files = e.dataTransfer.files;
+    displayFiles(files);
+});
+
+// File input change
+fileInput.addEventListener('change', () => {
+    displayFiles(Array.from(fileInput.files));
+});
+
+// Display file names
+function displayFiles(files) {
+    uploadedFiles.innerHTML = '';
+    files.forEach(file => {
+        const li = document.createElement('li');
+        li.textContent = file.name;
+        uploadedFiles.appendChild(li);
+    });
+}
+
+</script>
+
 {% endblock %}

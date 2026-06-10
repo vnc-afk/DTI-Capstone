@@ -7,17 +7,23 @@
     <h1>Welcome, {{ user }}.</h1>
     {% include 'dashboard/components/dashboard_actions.html' %}
 </header>
-
+{% if user.role == 'unverified_owner' %}
+<main class="dashboard-container">
+    <div class="verify-notice">
+        <span>Verify your account first through the settings page</span>
+        <a href="{% url 'settings' %}">Verify</a>
+    </div>
+</main>
+{% endif %}
 <main class="dashboard-container">
     <div class="grid">
-
         <!-- Transactions Summary -->
         <section class="card wide transaction-overview">
             <h2>Transactions Overview</h2>
             <div class="tiles">
                 <div class="tile">
                     <div class="tile-number">
-                        {{ sales_promos|length|add:personal_data_sheets|add:service_accreditations|add:inspection_reports|add:orders_of_payment|add:checklist_evaluation_sheets }}
+                        {{sales_promos|length|add:personal_data_sheets|add:service_accreditations|add:inspection_reports|add:orders_of_payment|add:checklist_evaluation_sheets}}
                     </div>
                     <div class="tile-title">Total Applications</div>
                 </div>
@@ -45,6 +51,10 @@
                     <div class="tile-number">{{ checklist_evaluation_sheets|length }}</div>
                     <div class="tile-title">Checklist Evaluation Sheets</div>
                 </div>
+                <div class="tile">
+                    <div class="tile-number">{{ other_business_name_related|length }}</div>
+                    <div class="tile-title">Other Business Name Related Documents</div>
+                </div>
             </div>
         </section>
 
@@ -54,14 +64,14 @@
             <h2>{{ section.title }}</h2>
             <ul>
                 {% for item in section.data %}
-                    <li><a href="{% url section.url item.id %}">{{ item }}</a></li>
+                <li><a href="{% url section.url item.id %}">{{ item }}</a></li>
                 {% empty %}
-                    <li>No records yet.</li>
+                <li>No records yet.</li>
                 {% endfor %}
             </ul>
         </section>
         {% endfor %}
-
     </div>
 </main>
+
 {% endblock %}

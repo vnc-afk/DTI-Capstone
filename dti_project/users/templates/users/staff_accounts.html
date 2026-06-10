@@ -4,8 +4,59 @@
 
 {% block body %}
 
-    {% include 'users/components/users_list_header.html' with title='Manage Staff' %}
+<!-- Page Title -->
+{% include 'users/components/users_list_header.html' with title='Manage Staff' %}
 
-    {% include 'users/components/user_table.html' %}
+<!-- Header / Actions -->
+<header class="documents-table-header" style="margin-top: 15px;">
+    <h3>Staff Accounts</h3>
+    <div class="actions" style="margin-top: 10px;">
+        <a href="{% url 'add_staff' %}" class="approve-btn" style="text-decoration: none;">
+            <i class="fas fa-user-plus"></i> Add Staff
+        </a>
+    </div>
+</header>
+
+<!-- Staff Table -->
+<div class="table-container" style="margin-top: 15px;">
+    <table class="documents-table">
+        <thead>
+            <tr>
+                <th style="text-align: center;">Name</th>
+                <th style="text-align: center;">Email</th>
+                <th style="text-align: center;">Role</th>
+                <th style="text-align: center;">Date Joined</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for user in staff_users %}
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 12px 15px;">{{ user.get_full_name }}</td>
+                <td style="padding: 12px 15px;">{{ user.email }}</td>
+                <td style="padding: 12px 15px; text-align: center;">
+                    {% if user.role == 'collection_agent' %}
+                    <span class="status-badge status-badge-approved">Collection Agent</span>
+                    {% elif user.role == 'alt_collection_agent' %}
+                    <span class="status-badge status-badge-approved">Alternative Collection Agent</span>
+                    {% elif user.role == 'authorized_official' %}
+                    <span class="status-badge status-badge-approved">Authorized Official</span>
+                    {% else %}
+                    <span>—</span>
+                    {% endif %}
+                </td>
+                <td style="text-align: center;">{{ user.date_joined|date:"M d, Y" }}</td>
+            </tr>
+
+            {% empty %}
+            <tr>
+                <td colspan="4" class="text-center text-muted">
+                    No staff accounts found.
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
 
 {% endblock %}

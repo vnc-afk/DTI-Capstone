@@ -11,7 +11,7 @@
 {% block body %}
 <div class="add-staff-wrapper">
   <div class="add-staff-card">
-    <h2>Add New Staff / Collection Agent</h2>
+    <h2>Add New Staff</h2>
 
     <form id="add-staff-form" method="post" novalidate>
       {% csrf_token %}
@@ -40,6 +40,15 @@
       <div class="form-group">
         <label for="id_birthday">Birthday</label>
         {{ form.birthday }}
+      </div>
+
+      <div class="form-group">
+        <label for="id_role">Role</label>
+        <select name="role" id="id_role" class="form-control">
+          <option value="authorized_official">Authorized Official</option>
+          <option value="collection_agent" selected>Collection Agent</option>
+          <option value="alt_collection_agent">Alternative Collection Agent</option>
+        </select>
       </div>
 
       <button type="submit" class="btn btn-primary">Create Staff Account</button>

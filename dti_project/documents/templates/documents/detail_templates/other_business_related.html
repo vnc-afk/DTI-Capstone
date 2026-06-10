@@ -1,0 +1,27 @@
+{% extends 'dashboard/layout.html' %}
+
+{% block title %} Other Business Name Related Documents {% endblock %}
+
+{% block body %}
+<div class="document-details-container">
+
+    {% include 'documents/components/document_header.html' with title="Other Business Name Related Documents" obj=document %}
+
+    <div class="details-grid">
+
+        <section class="grid-item" id="details-grid-item">
+            {% for group in detail_groups %}
+                {% with obj=document %}
+                    {% include 'documents/partials/details_grid_item.html' %}
+                {% endwith %} 
+            {% endfor %}
+        </section>
+
+        {% for group in requirement_groups %}
+            {% include 'documents/components/requirements_grid_item.html' with group=group obj=document %}
+        {% endfor %}
+
+    </div>
+
+</div>
+{% endblock %}

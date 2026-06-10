@@ -13,7 +13,9 @@ class CollectionReport(models.Model):
     report_collection_date = models.DateField(null=True, blank=True, unique=True)  # Add unique constraint
     report_no = models.CharField(max_length=255, blank=True, null=True, unique=True)  # Should be unique
     date_from = models.DateField(null=True, blank=True)
+    responsibility_center_code = models.CharField(max_length=50, blank=True, null=True)
     date_to = models.DateField(null=True, blank=True)
+    rc_code = models.CharField(max_length=50, null=True, blank=True)
 
     # Summary
     undeposited_last_report = models.DecimalField(
@@ -39,7 +41,7 @@ class CollectionReport(models.Model):
         help_text="Collections per OR Numbers: "
     )
 
-    responsibility_center_code = models.CharField(blank=True, null=True)
+    
     total = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
     certification = models.TextField(blank=True, null=True)
     name_of_collection_officer = models.CharField(max_length=255, blank=True, null=True)

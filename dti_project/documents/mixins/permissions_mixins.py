@@ -30,23 +30,26 @@ class OwnershipDraftMixin:
 class UserRoleMixin:
     @staticmethod
     def get_queryset_or_all(model, user):
-        if user.role == "collection_agent":
-            qs = model.objects.filter(
-                Q(status="draft", user=user) | ~Q(status="draft")
-            )
-        elif user.role == 'business_owner':
+        # Collection agents (main + alt) → same access
+        if user.role in ["collection_agent", "alt_collection_agent"]:
+            # Access drafts owned by user + all non-draft objects
+            qs = model.objects.filter(Q(status="draft", user=user) | ~Q(status="draft"))
+        # Authorized officials → same access as business owners
+        elif user.role == "authorized_official" or user.role == 'business_owner':
             qs = model.objects.filter(user=user)
+        # Admin → all access
         elif user.role == 'admin':
             qs = model.objects.all()
-            
-        return qs.only("pk", "id")  # Add other fields that __str__ methods need
+        else:
+            qs = model.objects.none()  # fallback for unknown roles
+        return qs.only("pk", "id")  # Add other fields your templates need
     
-    @staticmethod    
+    @staticmethod
     def get_count_or_all(model, user):
-        if user.role == "collection_agent":
-            return model.objects.filter(
-                Q(status="draft", user=user) | ~Q(status="draft")
-            ).count()
+        if user.role in ["collection_agent", "alt_collection_agent", "authorized_official"]:
+            return model.objects.filter(Q(status="draft", user=user) | ~Q(status="draft")).count()
+        elif user.role == "authorized_official" or user.role == 'business_owner':
+            return model.objects.filter(user=user).count()
         elif user.role == 'admin':
             return model.objects.count()
         else:

@@ -168,49 +168,6 @@ class BaseCustomForm(forms.ModelForm):
     def clean(self):
         cleaned_data = super().clean()
         
-        # Define the "from/to" field pairs with their checkbox
-        from_to_pairs = [
-            ('change_territorial_scope', 'territorial_scope_from', 'territorial_scope_to', 'Territorial Scope'),
-            ('change_owner_name', 'owner_name_from', 'owner_name_to', "Owner's Name"),
-            ('change_business_address', 'business_address_from', 'business_address_to', 'Business Address'),
-            ('change_owner_address', 'owner_address_from', 'owner_address_to', "Owner's Address"),
-        ]
-        
-        for checkbox_field, from_field, to_field, label in from_to_pairs:
-            # Only validate if these fields exist in the form
-            if from_field not in self.fields or to_field not in self.fields:
-                continue
-                
-            from_value = cleaned_data.get(from_field)
-            to_value = cleaned_data.get(to_field)
-            
-            # Convert None to empty string for consistent checking
-            from_value = from_value if from_value is not None else ''
-            to_value = to_value if to_value is not None else ''
-            
-            # Strip whitespace
-            from_str = str(from_value).strip() if from_value else ''
-            to_str = str(to_value).strip() if to_value else ''
-            
-            # If either field is filled, both must be filled
-            if from_str or to_str:
-                # Automatically set the checkbox to True
-                cleaned_data[checkbox_field] = True
-                
-                # Validate both fields are filled
-                if from_str and not to_str:
-                    self.add_error(to_field, f'Both "From" and "To" fields for {label} must be filled.')
-                elif to_str and not from_str:
-                    self.add_error(from_field, f'Both "From" and "To" fields for {label} must be filled.')
-                
-                # Check if both are filled and are the same
-                elif from_str and to_str:
-                    if from_str.lower() == to_str.lower():
-                        self.add_error(to_field, f'The "From" and "To" values for {label} cannot be the same.')
-            else:
-                # If both fields are empty, ensure checkbox is False
-                cleaned_data[checkbox_field] = False
-        
         return cleaned_data
 
     # --- Validation methods ---
@@ -318,23 +275,92 @@ class PersonalDataSheetForm(BaseCustomForm):
             self.fields['image'].widget.clear_checkbox_label = ''
             self.fields['image'].widget.initial_text = ''
             self.fields['image'].widget.input_text = ''
-
+            
 class OtherBusinessNameRelatedForm(BaseCustomForm):
     class Meta:
         model = OtherBusinessNameRelatedFormModel
         fields = '__all__'
         exclude = ['status', 'user']
 
-    # def __init__(self, *args, **kwargs):
-    #         super().__init__(*args, **kwargs)
-    #         # Hide the "Currently" label for image field
-    #         self.fields['valid_id_presented'].widget.attrs.update({
-    #             'style': 'display: none;'
-    #         })
-    #         # Remove help text that shows "Currently: filename"
-    #         self.fields['valid_id_presented'].widget.clear_checkbox_label = ''
-    #         self.fields['valid_id_presented'].widget.initial_text = ''
-    #         self.fields['valid_id_presented'].widget.input_text = ''
+    def clean(self):
+        cleaned_data = super().clean()
+
+        # Sections
+        bn_cert_purpose = cleaned_data.get('bn_certification_purpose')
+        authentication = cleaned_data.get('no_of_copies')
+        cancellation = cleaned_data.get('cancellation_reason')
+
+        # Change of Info sections - CHECK THE ACTUAL FIELDS, NOT THE CHECKBOXES
+        change_filled = False
+        
+        # Check territorial scope
+        if cleaned_data.get('territorial_scope_from') or cleaned_data.get('territorial_scope_to'):
+            change_filled = True
+            
+        # Check owner name
+        if cleaned_data.get('owner_name_from') or cleaned_data.get('owner_name_to') or cleaned_data.get('owner_name_proof_basis'):
+            change_filled = True
+            
+        # Check business address
+        if cleaned_data.get('business_address_from') or cleaned_data.get('business_address_to'):
+            change_filled = True
+            
+        # Check owner address
+        if cleaned_data.get('owner_address_from') or cleaned_data.get('owner_address_to'):
+            change_filled = True
+
+        # 1️⃣ Require at least one section
+        if not any([bn_cert_purpose, authentication, change_filled, cancellation]):
+            raise forms.ValidationError("You must fill at least one section: BN Certification, Authentication, Change of Info, or Cancellation.")
+
+        # 2️⃣ Cannot fill change-of-info if cancellation is filled
+        if cancellation and change_filled:
+            raise forms.ValidationError("You cannot fill any Change of Info fields if Cancellation is provided.")
+
+        # Define the "from/to" field pairs with their checkbox
+        from_to_pairs = [
+            ('change_territorial_scope', 'territorial_scope_from', 'territorial_scope_to', 'Territorial Scope'),
+            ('change_owner_name', 'owner_name_from', 'owner_name_to', "Owner's Name"),
+            ('change_business_address', 'business_address_from', 'business_address_to', 'Business Address'),
+            ('change_owner_address', 'owner_address_from', 'owner_address_to', "Owner's Address"),
+        ]
+        
+        for checkbox_field, from_field, to_field, label in from_to_pairs:
+            # Only validate if these fields exist in the form
+            if from_field not in self.fields or to_field not in self.fields:
+                continue
+                
+            from_value = cleaned_data.get(from_field)
+            to_value = cleaned_data.get(to_field)
+            
+            # Convert None to empty string for consistent checking
+            from_value = from_value if from_value is not None else ''
+            to_value = to_value if to_value is not None else ''
+            
+            # Strip whitespace
+            from_str = str(from_value).strip() if from_value else ''
+            to_str = str(to_value).strip() if to_value else ''
+            
+            # If either field is filled, both must be filled
+            if from_str or to_str:
+                # Automatically set the checkbox to True
+                cleaned_data[checkbox_field] = True
+                
+                # Validate both fields are filled
+                if from_str and not to_str:
+                    self.add_error(to_field, f'Both "From" and "To" fields for {label} must be filled.')
+                elif to_str and not from_str:
+                    self.add_error(from_field, f'Both "From" and "To" fields for {label} must be filled.')
+                
+                # Check if both are filled and are the same
+                elif from_str and to_str:
+                    if from_str.lower() == to_str.lower():
+                        self.add_error(to_field, f'The "From" and "To" values for {label} cannot be the same.')
+            else:
+                # If both fields are empty, ensure checkbox is False
+                cleaned_data[checkbox_field] = False
+
+        return cleaned_data
 
 class EmployeeBackgroundForm(BaseCustomForm):
     class Meta:

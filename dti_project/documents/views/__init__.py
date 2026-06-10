@@ -16,7 +16,7 @@ from .detail_views import (
     ChecklistEvaluationSheetDetailView,
     CollectionReportDetailView,
     CollectionReportItemDetailView,
-    
+    OtherBusinessRelatedDetailView
 )
 
 from .update_views import (

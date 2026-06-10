@@ -55,23 +55,19 @@ OTHER_BUSINESS_NAME_RELATED_FIELD_GROUPS = [
     ], 'authentication', None),
     
     ("Change of Info - Territorial Scope", [
-        ['change_territorial_scope'],
         ['territorial_scope_from', 'territorial_scope_to'],
     ], 'change-territorial-scope', None),
     
     ("Change of Info - Owner's Name", [
-        ['change_owner_name'],
         ['owner_name_from', 'owner_name_to'],
         ['owner_name_proof_basis'],
     ], 'change-owner-name', None),
     
     ("Change of Info - Business Address", [
-        ['change_business_address'],
         ['business_address_from', 'business_address_to'],
     ], 'change-business-address', None),
     
     ("Change of Info - Owner's Address", [
-        ['change_owner_address'],
         ['owner_address_from', 'owner_address_to'],
     ], 'change-owner-address', None),
     
@@ -231,6 +227,54 @@ SALES_PROMOTION_DETAIL_GROUPS = [
         ("Advertising Agency Designation", "advertising_agency_designation"),
     ], "advertising"),
 ]
+
+OTHER_BUSINESS_NAME_RELATED_DETAIL_GROUPS = [
+    ("Business Information", [
+        ("Business Name", "name_of_business"),
+        ("Certificate Number", "certificate_number"),
+        ("Date Registered", "date_registered"),
+        ("TRN Reference Code", "trn_ref_code"),
+        ("Valid ID Presented", "valid_id_presented"),
+    ], 'business-info'),
+
+    ("BN Certification", [
+        ("Purpose", "bn_certification_purpose"),
+    ], 'bn-certification'),
+
+    ("Authentication", [
+        ("Number of Copies", "no_of_copies"),
+    ], 'authentication'),
+
+    ("Change of Info - Territorial Scope", [
+        ("Change Territorial Scope", "change_territorial_scope"),
+        ("From", "territorial_scope_from"),
+        ("To", "territorial_scope_to"),
+    ], 'change-territorial-scope'),
+
+    ("Change of Info - Owner's Name", [
+        ("Change Owner Name", "change_owner_name"),
+        ("Owner Name From", "owner_name_from"),
+        ("Owner Name To", "owner_name_to"),
+        ("Proof/Basis", "owner_name_proof_basis"),
+    ], 'change-owner-name'),
+
+    ("Change of Info - Business Address", [
+        ("Change Business Address", "change_business_address"),
+        ("From", "business_address_from"),
+        ("To", "business_address_to"),
+    ], 'change-business-address'),
+
+    ("Change of Info - Owner's Address", [
+        ("Change Owner Address", "change_owner_address"),
+        ("Owner Address From", "owner_address_from"),
+        ("Owner Address To", "owner_address_to"),
+    ], 'change-owner-address'),
+
+    ("Cancellation", [
+        ("Reason", "cancellation_reason"),
+    ], 'cancellation'),
+]
+
 
 PERSONAL_DATA_SHEET_DETAIL_GROUPS = [
     ("Personal Information", [

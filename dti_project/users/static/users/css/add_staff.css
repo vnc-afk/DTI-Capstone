@@ -15,7 +15,7 @@
     font-family: Arial, sans-serif;
 
     padding: 30px;
-    max-height: 600px;
+    max-height: 610px;
     overflow-y: auto;
     overflow-x: hidden;
 
@@ -163,5 +163,26 @@ button.btn-primary:hover {
 .popup-buttons .btn-success:hover {
     background-color: #0056b3;
     text-decoration: none;       /* Keep no underline on hover */
+}
+
+/* Style all form controls (inputs and selects) */
+.form-control {
+    width: 100%;
+    padding: 8px 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+    appearance: none; /* Remove default dropdown arrow style on some browsers */
+    background-color: #fff;
+    
+}
+
+/* Focus state */
+.form-control:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
 }
 

@@ -734,3 +734,17 @@
 .approve-btn:hover {
     transform: translateY(-1px);
 }
+
+.export-to-excel-btn {
+    display: flex;
+    align-items: start;
+    background-color: var(--success-color);
+    color: white;
+    border: solid 1px var(--border-color);
+    outline: none;
+    cursor: pointer;
+    font-size: clamp(0.5rem, 0.75vw, 1.5rem);
+    padding: 0.5rem 1rem;
+    border-radius: var(--radius-sm);
+    transition: 0.3s;
+}

@@ -5,8 +5,8 @@ from ..mixins.sort_mixins import SortCollectionReportListItemMixin
 from ..mixins.permissions_mixins import RoleFormPageRestrictionMixin
 from ..models.collection_models import CollectionReport, CollectionReportItem
 from ..mixins.context_mixins import TabsSectionMixin
-from ..constants import CHECKLIST_EVALUATION_DETAIL_GROUPS, CHECKLIST_REQUIREMENT_GROUPS, COLLECTION_REPORT_ITEM_DETAIL_GROUPS, INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS, SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
-from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication
+from ..constants import CHECKLIST_EVALUATION_DETAIL_GROUPS, CHECKLIST_REQUIREMENT_GROUPS, COLLECTION_REPORT_ITEM_DETAIL_GROUPS, INSPECTION_VALIDATION_DETAIL_GROUPS, ORDER_OF_PAYMENT_DETAIL_GROUPS, OTHER_BUSINESS_NAME_RELATED_DETAIL_GROUPS, PERSONAL_DATA_SHEET_DETAIL_GROUPS, PERSONAL_DATA_SHEET_TAB_SECTIONS, SALES_PROMOTION_DETAIL_GROUPS, SERVICE_REPAIR_ACCREDITATION_DETAIL_GROUPS
+from ..models import ChecklistEvaluationSheet, InspectionValidationReport, OrderOfPayment, PersonalDataSheet, SalesPromotionPermitApplication, ServiceRepairAccreditationApplication,  OtherBusinessNameRelatedFormModel
 from django.views.generic import DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 
@@ -140,6 +140,17 @@ class ChecklistEvaluationSheetDetailView(LoginRequiredMixin, DetailView):
         context['detail_groups'] = CHECKLIST_EVALUATION_DETAIL_GROUPS
         context['requirement_groups'] = CHECKLIST_REQUIREMENT_GROUPS
         context["update_url_name"] = "update-checklist-evaluation-sheet"
+
+        return context
+    
+class OtherBusinessRelatedDetailView(LoginRequiredMixin, DetailView):
+    template_name = 'documents/detail_templates/other_business_related.html'
+    model = OtherBusinessNameRelatedFormModel
+    context_object_name = 'document'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['detail_groups'] = OTHER_BUSINESS_NAME_RELATED_DETAIL_GROUPS
 
         return context
     

@@ -130,6 +130,7 @@ class ProcessUploadView(View):
             'report_collection_date': None,
             'certification': None,
             'name_of_collection_officer': None,
+            'responsibility_center_code': None,
             'official_designation': None,
             'total': None,
             'undeposited_last_report': None,
@@ -180,6 +181,19 @@ class ProcessUploadView(View):
                             metadata['report_no'] = str(next_cell.value).strip()
                             print(f"✓ Found Report No at row {row_idx} (adjacent cell): '{metadata['report_no']}'")
                 
+                if 'responsibility center' in cell_lower or 'rc code' in cell_lower or 'rc_code' in cell_lower:
+                # Check if value is in same cell (e.g., "RC Code: 1234")
+                    parts = cell_text.split(':')
+                    if len(parts) > 1:
+                        metadata['responsibility_center_code'] = parts[-1].strip()
+                        print(f"✓ Found RC Code at row {row_idx}: '{metadata['responsibility_center_code']}'")
+                    else:
+                        # Check adjacent cells (value might be in next cell)
+                        next_cell = ws.cell(row=cell.row, column=cell.column + 1)
+                        if next_cell.value:
+                            metadata['responsibility_center_code'] = str(next_cell.value).strip()
+                            print(f"✓ Found RC Code at row {row_idx} (adjacent cell): '{metadata['responsibility_center_code']}'")
+                            
                 # Extract Date (usually below DTI Office)
                 if not metadata['report_collection_date']:
                     # Check if this looks like a date
@@ -622,11 +636,42 @@ class ProcessUploadView(View):
                         date_header = next(h for h in headers if "date" in h)
                         field_map[date_header] = "date"
                     
-                    if "responsibility_center_code" not in field_map:
-                        for h in headers:
-                            if h == "rc_code" or h == "responsibility_center_code":
-                                field_map[h] = "responsibility_center_code"
+                    # Map responsibility center code field - ENHANCED VERSION
+                    print(f"\nDEBUG - All headers after normalization: {headers}")
+                    print(f"DEBUG - Looking for RC code mapping...")
+
+                    rc_mapped = False
+                    for idx, h in enumerate(headers):
+                        if not rc_mapped:
+                            print(f"  Checking header[{idx}]: '{h}'")
+                            
+                            # Strategy 1: Direct match
+                            if h in ["rc_code", "responsibility_center_code"]:
+                                field_map[h] = "rc_code"
+                                print(f"  ✓ Mapped '{h}' to 'rc_code' (direct match)")
+                                rc_mapped = True
                                 break
+                            
+                            # Strategy 2: Contains both "responsibility" and "center"
+                            if "responsibility" in h and "center" in h:
+                                field_map[h] = "rc_code"
+                                print(f"  ✓ Mapped '{h}' to 'rc_code' (contains 'responsibility' + 'center')")
+                                rc_mapped = True
+                                break
+                            
+                            # Strategy 3: Contains "responsibility" and "code"
+                            if "responsibility" in h and "code" in h:
+                                field_map[h] = "rc_code"
+                                print(f"  ✓ Mapped '{h}' to 'rc_code' (contains 'responsibility' + 'code')")
+                                rc_mapped = True
+                                break
+
+                    if not rc_mapped:
+                        print("  ✗ No RC code column found in headers")
+                    else:
+                        print(f"DEBUG - Field map now includes RC code mapping")
+
+                    print(f"DEBUG - Complete field_map: {field_map}\n")
 
                     # Check for existing report and merge
                     is_merge = False
@@ -698,7 +743,8 @@ class ProcessUploadView(View):
                             report_collection_date=metadata['report_collection_date'],
                             certification=metadata['certification'],
                             name_of_collection_officer=metadata['name_of_collection_officer'],
-                            official_designation=metadata['official_designation']
+                            official_designation=metadata['official_designation'],
+                            responsibility_center_code=metadata.get('responsibility_center_code', None)
                         )
                         created_report_ids.append(report.id)
                         # Store in cache for cleanup
@@ -775,6 +821,9 @@ class ProcessUploadView(View):
 
                             data[field_name] = value
                         
+                            if field_name == "rc_code" and value:
+                                print(f"DEBUG - Found RC code in row {row_index}: '{value}'")
+                                
                         # Receipt number fallback logic
                         if 'number' not in data or not data['number']:
                             date_col_idx = None
@@ -843,14 +892,24 @@ class ProcessUploadView(View):
                             with transaction.atomic():
                                 item = CollectionReportItem.objects.create(**data)
                                 created_item_ids.append(item.id)
-                                # Store in cache for cleanup
                                 cache.set(f'upload_created_items_{session_id}', created_item_ids, timeout=600)
                                 report.report_items.add(item)
                                 items_added += 1
+                                
                         except Exception as e:
                             print(f"Failed to save row {row_index}: {e}")
                             continue
-
+                    
+                    # After all items are added, populate responsibility_center_code
+                    if not report.responsibility_center_code:
+                        first_item = report.report_items.first()
+                        if first_item and first_item.rc_code:
+                            report.responsibility_center_code = first_item.rc_code
+                            report.save()
+                            print(f"DEBUG: Auto-set responsibility_center_code to '{report.responsibility_center_code}'")
+                        else:
+                            print(f"DEBUG: Could not auto-set RC code - first item: {first_item}, rc_code: {first_item.rc_code if first_item else 'N/A'}")
+                        
                     # Track reports
                     if is_merge:
                         if report not in merged_reports_list:

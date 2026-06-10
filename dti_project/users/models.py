@@ -12,9 +12,12 @@ from django.contrib.contenttypes.fields import GenericForeignKey
 
 class User(AbstractUser):
     class Roles(models.TextChoices):
+        UNVERIFIED_OWNER = "unverified_owner", "Unverfied Owner"
         BUSINESS_OWNER = "business_owner", "Business Owner"
         ADMIN = "admin", "Admin"
         COLLECTION_AGENT = "collection_agent", "Collection Agent"
+        ALT_COLLECTION_AGENT = "alt_collection_agent", "Alternative Collection Agent"
+        AUTHORIZED_OFFICIAL = "authorized_official", "Authorized Official"
 
     profile_picture = models.ImageField(
         upload_to='profile_pictures/',
@@ -24,7 +27,7 @@ class User(AbstractUser):
     role = models.CharField(
         max_length=20,
         choices=Roles.choices,
-        default=Roles.BUSINESS_OWNER
+        default=Roles.UNVERIFIED_OWNER
     )
     is_verified = models.BooleanField(default=False)
     verification_code = models.CharField(max_length=6, blank=True, null=True)

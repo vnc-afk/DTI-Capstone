@@ -1,11 +1,132 @@
 {% extends 'dashboard/layout.html' %}
+{% load static custom_filters %}
+{% if messages %}
+  <div class="messages-wrapper">
+    {% for message in messages %}
+      <div class="alert 
+                  {% if message.tags == 'debug' %}alert-debug{% endif %}
+                  {% if message.tags == 'info' %}alert-info{% endif %}
+                  {% if message.tags == 'success' %}alert-success{% endif %}
+                  {% if message.tags == 'warning' %}alert-warning{% endif %}
+                  {% if message.tags == 'error' %}alert-error{% endif %}">
+        {{ message }}
+      </div>
+    {% endfor %}
+  </div>
+{% endif %}
 
 {% block title %}Business Owners{% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/css/user_list.css' %}">
+<link rel="stylesheet" href="{% static 'users/css/docuverification.css' %}">
+{% endblock %}
+
 {% block body %}
 
-    {% include 'users/components/users_list_header.html' with title='Manage Business Owners' %}
+{% include 'users/components/users_list_header.html' with title='Manage Business Owners' %}
 
-    {% include 'users/components/user_table.html' %}
+<header class="documents-table-header" style="margin-top: 15px;">
+    <h3>Business Owner Accounts</h3>
+</header>
 
+
+<div class="table-container">
+    <table class="documents-table">
+        <thead>
+            <tr>
+                <th style= "text-align: center;">Name</th>
+                <th style= "text-align: center;">Email</th>
+                <th style= "text-align: center;">Status</th>
+                <th style= "text-align: center;">Date Joined</th>
+                <th style= "text-align: center;">Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in businesshumans %}
+            <tr style="border-bottom: 1px solid #ddd;">
+                <td style="padding: 12px 15px;">{{ user.get_full_name }}</td>
+                <td style="padding: 12px 15px;">{{ user.email }}</td>
+                <td style="padding: 12px 15px; text-align: center;">
+                    {% if user.role == 'unverified_owner' %}
+                    <span class="status-badge status-badge-warning">Unverified</span>
+                    {% elif user.role == 'business_owner' %}
+                    <span class="status-badge status-badge-approved">Verified</span>
+                    {% else %}
+                    <span class="status-badge status-badge-light">—</span>
+                    {% endif %}
+                </td>
+                <td style="padding: 12px 15px; text-align: center;">
+                    {{ user.date_joined|date:"M d, Y" }}
+                </td>
+                <td style="padding: 12px 15px; text-align: center;">
+                    {% if user.role == 'unverified_owner' %}
+                    <button type="button" class="btn approve-btn" onclick="openPopup('verifyPopup{{ user.id }}')">Verify</button>
+                    {% else %}
+                    <span class="text-muted">—</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center text-muted">No business owners found.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<!-- Verification Popups -->
+{% for user in businesshumans %}
+{% if user.role == 'unverified_owner' %}
+<div id="verifyPopup{{ user.id }}" class="popup-overlay">
+  <div class="popup-box">
+    <h2>{{ user.get_full_name }}'s Documents for Verification</h2>
+
+    {% if user.verification_documents.exists %}
+    <div class="verification-grid">
+        {% for doc in user.verification_documents.all %}
+        <div>
+            <a href="{{ doc.file.url }}" target="_blank">
+                <img src="{{ doc.file.url }}" alt="{{ doc.file.name }}" class="doc-thumb">
+            </a>
+            <div class="doc-info">
+                Uploaded: {{ doc.uploaded_at|date:"M d, Y H:i" }}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+      <p class="text-muted">No documents uploaded yet.</p>
+    {% endif %}
+
+    <div class="popup-buttons">
+      <form method="POST" action="{% url 'verify_user' user.id %}">
+        {% csrf_token %}
+        <button type="submit" name="action" value="deny" class="btn btn-danger">Deny</button>
+        <button type="submit" name="action" value="verify" class="btn btn-success">Verify</button>
+      </form>
+      <button class="btn btn-secondary close-popup" data-popup-id="verifyPopup{{ user.id }}">Close</button>
+    </div>
+  </div>
+</div>
+{% endif %}
+{% endfor %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'users/js/bo_accounts.js' %}"></script>
+<script>
+function openPopup(id) {
+    document.getElementById(id).classList.add('active');
+}
+
+document.querySelectorAll('.close-popup').forEach(btn => {
+    btn.addEventListener('click', function() {
+        const popupId = this.getAttribute('data-popup-id');
+        document.getElementById(popupId).classList.remove('active');
+    });
+});
+</script>
 {% endblock %}

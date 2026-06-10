@@ -10,6 +10,7 @@ from .service_repair_accreditation_model import ServiceRepairAccreditationApplic
 from .change_request_models import ChangeRequest
 from .collection_models import CollectionReport, CollectionReportItem
 from .other_business_name_related_model import OtherBusinessNameRelatedFormModel
+from .collection_models import CollectionReport, CollectionReportItem
 
 __all__ = [
     # Base models

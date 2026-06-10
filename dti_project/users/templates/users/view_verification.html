@@ -1,0 +1,65 @@
+<!-- Currently not used -->
+
+
+{% extends 'dashboard/layout.html' %}
+
+{% block title %}Verification Request{% endblock %}
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'users/css/docuverification.css' %}">
+{% endblock %}
+{% block body %}
+
+<!-- Centered Verification Modal -->
+<div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel"
+    aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verificationModalLabel">
+                    {{ user.get_full_name }}'s Documents for Verification
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                {% if documents %}
+                <div class="verification-grid">
+                    {% for doc in documents %}
+                    <div>
+                        <!-- Thumbnail clickable to open full image -->
+                        <a href="{{ doc.file.url }}" target="_blank">
+                            <img src="{{ doc.file.url }}" alt="{{ doc.file.name }}" class="doc-thumb">
+                        </a>
+                        <div class="doc-info">
+                            Uploaded: {{ doc.uploaded_at|date:"M d, Y H:i" }}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted">No documents uploaded yet.</p>
+                {% endif %}
+            </div>
+
+
+
+            <div class="modal-footer">
+                <form method="post" class="d-flex gap-2">
+                    {% csrf_token %}
+                    <button type="submit" name="action" value="deny" class="btn btn-danger">Deny</button>
+                    <button type="submit" name="action" value="verify" class="btn btn-success">Verify</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Optional: auto-show the modal on page load -->
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var verificationModal = new bootstrap.Modal(document.getElementById('verificationModal'));
+        verificationModal.show();
+    });
+</script>
+
+{% endblock %}

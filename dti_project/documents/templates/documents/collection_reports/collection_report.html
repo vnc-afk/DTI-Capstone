@@ -5,79 +5,85 @@
 {% block title %} Collection {{ collection_report }} {% endblock %}
 
 {% block extra_css %}
-    <link rel="stylesheet" href="{% static 'documents/css/upload-report.css' %}">
+<link rel="stylesheet" href="{% static 'documents/css/upload-report.css' %}">
 {% endblock %}
 
 {% block body %}
 
-    {% include 'documents/components/collection_report_components/collection_report_filter_modal.html' %}
+{% include 'documents/components/collection_report_components/collection_report_filter_modal.html' %}
 
-    <header class="document-details-header">
-        <div class="column">
-            <h1>Collection {{ collection_report }}</h1>
-        </div>
-        <div class="actions">
-            {% include 'dashboard/components/dashboard_actions.html' %}
-        </div>
-    </header>
+<header class="document-details-header">
+    <div class="column">
+        <h1>Collection {{ collection_report }}</h1>
+    </div>
+    <div class="actions">
+        {% include 'dashboard/components/dashboard_actions.html' %}
+    </div>
+</header>
 
-    <div class="collection-summary">
-        <h2>Summary</h2>
-        <ul>
-            <li>
-                <strong>DTI Office: </strong>
-                <p>{{ collection_report.dti_office }}</p>
-            </li>
+<div class="collection-summary">
+    <h2>Summary</h2>
+    <ul>
+        <li>
+            <strong>DTI Office: </strong>
+            <p>{{ collection_report.dti_office }}</p>
+        </li>
 
-            {% if collection_report.report_no %}
-                <li>
-                    <strong>Report No: </strong>
-                    <p>{{ collection_report.report_no }}</p>
-                </li>
-            {% endif %}
+        {% if collection_report.report_no %}
+        <li>
+            <strong>Report No: </strong>
+            <p>{{ collection_report.report_no }}</p>
+        </li>
+        {% endif %}
 
-            {% if collection_report.collection_date %}
-                <li>
-                    <strong>Report Collection Date: </strong>
-                    <p>{{ collection_report.report_collection_date }}</p>
-                </li>
-            {% endif %}
 
-            {% if collection_report.responsibility_center_code %}
-                <li>
-                    <strong>Responsibility Center Code </strong>
-                    <p>{{ collection_report.report_responsibility_center_code }}</p>
-                </li>
-            {% endif %}
+        <li>
+            <strong>Responsibility Center Code: </strong>
+            <p>{{ collection_report.responsibility_center_code|default:"272-11-03-03" }}</p>
+        </li>
 
-            {% if collection_report.date_from %}
-                <li>
-                    <strong>Date from: </strong>
-                    <p>{{ collection_report.date_from }}</p>
-                </li>
-            {% endif %}
-            
-            {% if collection_report.date_to %}
-                <li>
-                    <strong>Date to:</strong>
-                    <p>{{ collection_report.date_to }}</p>
-                </li>
-            {% endif %}
+        {% if collection_report.collection_date %}
+        <li>
+            <strong>Report Collection Date: </strong>
+            <p>{{ collection_report.collections.first.report_collection_date }}</p>
+        </li>
+        {% endif %}
 
-            {% if collection_report.name_of_collection_officer %}
-                <li>
-                    <strong>Name of Collection Officer:</strong>
-                    <p>{{ collection_report.name_of_collection_officer }}</p>
-                </li>
-            {% endif %}
+        {% if collection_report.responsibility_center_code %}
+        <li>
+            <strong>Responsibility Center Code </strong>
+            <p>{{ collection_report.report_responsibility_center_code }}</p>
+        </li>
+        {% endif %}
 
-            {% if collection_report.official_designation %}
-                <li>
-                    <strong>Official Designation:</strong>
-                    <p>{{ collection_report.official_designation }}</p>
-                </li>
-            {% endif %}
-<!-- 
+        {% if collection_report.date_from %}
+        <li>
+            <strong>Date from: </strong>
+            <p>{{ collection_report.date_from }}</p>
+        </li>
+        {% endif %}
+
+        {% if collection_report.date_to %}
+        <li>
+            <strong>Date to:</strong>
+            <p>{{ collection_report.date_to }}</p>
+        </li>
+        {% endif %}
+
+        {% if collection_report.name_of_collection_officer %}
+        <li>
+            <strong>Name of Collection Officer:</strong>
+            <p>{{ collection_report.name_of_collection_officer }}</p>
+        </li>
+        {% endif %}
+
+        {% if collection_report.official_designation %}
+        <li>
+            <strong>Official Designation:</strong>
+            <p>{{ collection_report.official_designation }}</p>
+        </li>
+        {% endif %}
+        <!-- 
             <li>
                 <strong>Undeposited Last Report:</strong>
                 <p>{{ collection_report.undeposited_last_report }}</p>
@@ -99,12 +105,12 @@
             </li>
  -->
 
-        </ul>
-    </div>
-    
-    <div class="upload-report-container">
-        {% include 'documents/components/collection_report_components/collection_report_header.html' %}
-        {% include 'documents/components/collection_report_components/collection_report_table.html' with items=items %}
-    </div>
+    </ul>
+</div>
+
+<div class="upload-report-container">
+    {% include 'documents/components/collection_report_components/collection_report_header.html' %}
+    {% include 'documents/components/collection_report_components/collection_report_table.html' with items=items %}
+</div>
 
 {% endblock %}

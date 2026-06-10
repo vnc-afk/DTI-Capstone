@@ -219,6 +219,99 @@
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* Popup overlay */
+.popup-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    display: none;
+    justify-content: center;
+    align-items: center;
+    z-index: 9999;
+}
+
+/* Show popup */
+.popup-overlay.active {
+    display: flex;
+}
+
+/* Popup box */
+.popup-box {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    width: 100%;
+    max-width: 500px;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.popup-box h2 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.popup-box p.note {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+}
+
+/* Buttons inside popup */
+.popup-buttons {
+    display: flex;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.popup-buttons .btn {
+    min-width: 100px;
+}
+
+/* Drag & Drop box */
+#verifyForm {
+    display: flex;
+    flex-direction: column;
+}
+
+#verifyForm input[type="file"] {
+    display: none; /* hide default file input */
+}
+
+#dropBox {
+    border: 2px dashed #3b82f6;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s;
+    margin-bottom: 1rem;
+}
+
+#dropBox.dragover {
+    background: #e0f2fe;
+}
+
+#dropBox p {
+    margin: 0;
+    font-weight: 500;
+    color: #111827;
+}
+
+#uploadedFiles {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#uploadedFiles li {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
 .log-action-type {
     display: inline-block;
     padding: 3px 8px;

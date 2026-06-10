@@ -1,131 +1,258 @@
+// From-To Field Validation
 document.addEventListener('DOMContentLoaded', function() {
-    // Define the change checkbox and their corresponding from/to fields
-    const changeFieldGroups = [
+    // Define the from/to field pairs based on your Django form
+    const fieldPairs = [
         {
-            checkbox: 'change_territorial_scope',
-            fromField: 'territorial_scope_from',
-            toField: 'territorial_scope_to',
-            fieldsetId: 'change-territorial-scope-fieldset'
+            checkbox: 'id_change_territorial_scope',
+            from: 'id_territorial_scope_from',
+            to: 'id_territorial_scope_to',
+            isSelect: true
         },
         {
-            checkbox: 'change_owner_name',
-            fromField: 'owner_name_from',
-            toField: 'owner_name_to',
-            fieldsetId: 'change-owner-name-fieldset'
+            checkbox: 'id_change_owner_name',
+            from: 'id_owner_name_from',
+            to: 'id_owner_name_to',
+            isSelect: false
         },
         {
-            checkbox: 'change_business_address',
-            fromField: 'business_address_from',
-            toField: 'business_address_to',
-            fieldsetId: 'change-business-address-fieldset'
+            checkbox: 'id_change_business_address',
+            from: 'id_business_address_from',
+            to: 'id_business_address_to',
+            isSelect: false
         },
         {
-            checkbox: 'change_owner_address',
-            fromField: 'owner_address_from',
-            toField: 'owner_address_to',
-            fieldsetId: 'change-owner-address-fieldset'
+            checkbox: 'id_change_owner_address',
+            from: 'id_owner_address_from',
+            to: 'id_owner_address_to',
+            isSelect: false
         }
     ];
 
-    // Function to check if any field in a group has value
-    function hasFieldValues(fromFieldName, toFieldName) {
-        const fromField = document.querySelector(`[name="${fromFieldName}"]`);
-        const toField = document.querySelector(`[name="${toFieldName}"]`);
-        
-        const fromValue = fromField ? fromField.value.trim() : '';
-        const toValue = toField ? toField.value.trim() : '';
-        
-        return fromValue !== '' || toValue !== '';
+    // Function to check if a field has content
+    function hasContent(field) {
+        if (!field) return false;
+        const value = field.value.trim();
+        return value.length > 0;
     }
 
-    // Function to update checkbox and fieldset visibility
-    function updateFieldsetVisibility(group) {
-        const checkbox = document.querySelector(`[name="${group.checkbox}"]`);
-        const fieldset = document.getElementById(group.fieldsetId);
-        const fromField = document.querySelector(`[name="${group.fromField}"]`);
-        const toField = document.querySelector(`[name="${group.toField}"]`);
+    // Function to add helper text to label
+    function addHelperText(toField) {
+        if (!toField) return;
         
-        if (!checkbox || !fieldset) return;
+        // Find the label for this field
+        const label = toField.parentElement.querySelector('label');
+        if (!label) return;
         
-        const hasValues = hasFieldValues(group.fromField, group.toField);
+        // Check if helper text already exists
+        const existingHelper = label.querySelector('.fill-from-first-text');
+        if (existingHelper) return;
         
-        // Auto-check checkbox if fields have values
-        if (hasValues) {
-            checkbox.checked = true;
-            fieldset.style.display = 'block';
-        } else {
-            // If checkbox is manually unchecked and fields are empty, hide fieldset
-            if (!checkbox.checked) {
-                fieldset.style.display = 'none';
-                // Clear the fields
-                if (fromField) fromField.value = '';
-                if (toField) toField.value = '';
-            }
-        }
+        // Create helper text element
+        const helperText = document.createElement('span');
+        helperText.className = 'fill-from-first-text';
+        helperText.style.color = '#ff6b6b';
+        helperText.style.fontSize = '0.85em';
+        helperText.style.fontWeight = 'normal';
+        helperText.style.fontStyle = 'italic';
+        helperText.style.marginLeft = '0.5rem';
+        helperText.textContent = '(Fill "From" field first)';
         
-        // Show fieldset when checkbox is checked
-        if (checkbox.checked) {
-            fieldset.style.display = 'block';
+        // Append to label
+        label.appendChild(helperText);
+    }
+
+    // Function to remove helper text
+    function removeHelperText(toField) {
+        if (!toField) return;
+        const label = toField.parentElement.querySelector('label');
+        if (!label) return;
+        
+        const helperText = label.querySelector('.fill-from-first-text');
+        if (helperText) {
+            helperText.remove();
         }
     }
 
-    // Function to update all fieldsets
-    function updateAllFieldsets() {
-        changeFieldGroups.forEach(group => {
-            updateFieldsetVisibility(group);
+    // Function to disable selected option in "to" select field
+    function disableMatchingOption(fromField, toField) {
+        if (!toField || toField.tagName !== 'SELECT') return;
+        
+        const selectedValue = fromField.value;
+        
+        // Re-enable all options first
+        Array.from(toField.options).forEach(option => {
+            option.disabled = false;
+            option.style.color = '';
         });
         
-        // Update progress indicator
-        updateProgressSteps();
-        
-        // Recalculate step completion
-        if (typeof checkStepCompletion === 'function') {
-            checkStepCompletion();
-        }
-    }
-
-    // Function to update progress steps visibility
-    function updateProgressSteps() {
-        changeFieldGroups.forEach(group => {
-            const checkbox = document.querySelector(`[name="${group.checkbox}"]`);
-            const fieldset = document.getElementById(group.fieldsetId);
-            const step = document.querySelector(`[data-target="${group.fieldsetId}"]`);
-            
-            if (step && fieldset) {
-                if (fieldset.style.display === 'none') {
-                    step.style.display = 'none';
-                } else {
-                    step.style.display = '';
+        // Disable the matching option
+        if (selectedValue) {
+            Array.from(toField.options).forEach(option => {
+                if (option.value === selectedValue) {
+                    option.disabled = true;
+                    option.style.color = '#ccc';
                 }
+            });
+            
+            // If the "to" field currently has the same value selected, clear it
+            if (toField.value === selectedValue) {
+                toField.value = '';
             }
-        });
+        }
     }
 
-    // Add event listeners to all checkboxes
-    changeFieldGroups.forEach(group => {
-        const checkbox = document.querySelector(`[name="${group.checkbox}"]`);
+    // Function to update checkbox state based on from/to fields
+    function updateCheckboxState(checkboxField, fromField, toField) {
+        if (!checkboxField) return;
         
-        if (checkbox) {
-            checkbox.addEventListener('change', function() {
-                updateFieldsetVisibility(group);
+        const fromValue = fromField.value.trim();
+        const toValue = toField.value.trim();
+        
+        // Check both fields are filled
+        if (fromValue && toValue) {
+            checkboxField.checked = true;
+        } else {
+            checkboxField.checked = false;
+        }
+    }
+
+    // Function to disable/enable the "to" field
+    function updateToFieldState(fromField, toField, isSelect, checkboxField) {
+        if (!toField) return;
+        
+        if (hasContent(fromField)) {
+            // Enable the "to" field
+            toField.disabled = false;
+            toField.style.backgroundColor = '';
+            toField.style.cursor = '';
+            removeHelperText(toField);
+            
+            // For select fields, disable the matching option
+            if (isSelect) {
+                disableMatchingOption(fromField, toField);
+            }
+        } else {
+            // Disable the "to" field and clear its value
+            toField.disabled = true;
+            toField.value = '';
+            toField.style.backgroundColor = '#f5f5f5';
+            toField.style.cursor = 'not-allowed';
+            addHelperText(toField);
+        }
+        
+        // Update checkbox state
+        updateCheckboxState(checkboxField, fromField, toField);
+    }
+
+    // Initialize all field pairs
+    fieldPairs.forEach(pair => {
+        const checkboxField = document.getElementById(pair.checkbox);
+        const fromField = document.getElementById(pair.from);
+        const toField = document.getElementById(pair.to);
+
+        if (fromField && toField) {
+            // Set initial state
+            updateToFieldState(fromField, toField, pair.isSelect, checkboxField);
+
+            // Add event listeners to the "from" field
+            fromField.addEventListener('input', function() {
+                updateToFieldState(fromField, toField, pair.isSelect, checkboxField);
             });
-        }
-        
-        // Add event listeners to from/to fields
-        const fromField = document.querySelector(`[name="${group.fromField}"]`);
-        const toField = document.querySelector(`[name="${group.toField}"]`);
-        
-        if (fromField) {
-            fromField.addEventListener('input', () => updateFieldsetVisibility(group));
-            fromField.addEventListener('change', () => updateFieldsetVisibility(group));
-        }
-        
-        if (toField) {
-            toField.addEventListener('input', () => updateFieldsetVisibility(group));
-            toField.addEventListener('change', () => updateFieldsetVisibility(group));
+
+            fromField.addEventListener('change', function() {
+                updateToFieldState(fromField, toField, pair.isSelect, checkboxField);
+            });
+
+            // Add event listeners to the "to" field to update checkbox
+            toField.addEventListener('input', function() {
+                updateCheckboxState(checkboxField, fromField, toField);
+            });
+
+            toField.addEventListener('change', function() {
+                updateCheckboxState(checkboxField, fromField, toField);
+            });
+
+            // Prevent interaction with disabled "to" field
+            toField.addEventListener('focus', function(e) {
+                if (!hasContent(fromField)) {
+                    e.preventDefault();
+                    fromField.focus();
+                    
+                    // Optional: Show a brief visual feedback
+                    fromField.style.border = '2px solid #ff6b6b';
+                    setTimeout(() => {
+                        fromField.style.border = '';
+                    }, 1000);
+                }
+            });
         }
     });
 
-    // Initialize on page load
-    updateAllFieldsets();
+    // Prevent negative numbers in no_of_copies field
+    const noOfCopiesField = document.getElementById('id_no_of_copies');
+    if (noOfCopiesField) {
+        // Prevent typing minus sign and 'e' (scientific notation)
+        noOfCopiesField.addEventListener('keydown', function(e) {
+            if (e.key === '-' || e.key === 'e' || e.key === 'E' || e.key === '+') {
+                e.preventDefault();
+            }
+        });
+
+        // Remove negative values on paste or input
+        noOfCopiesField.addEventListener('input', function(e) {
+            if (this.value < 0) {
+                this.value = '';
+            }
+            // Remove leading zeros
+            if (this.value.length > 1 && this.value.startsWith('0')) {
+                this.value = parseInt(this.value, 10) || '';
+            }
+        });
+
+        // Ensure minimum value on blur
+        noOfCopiesField.addEventListener('blur', function(e) {
+            if (this.value && parseInt(this.value, 10) < 0) {
+                this.value = '';
+            }
+        });
+    }
+
+    // Validate TRN code - only letters and numbers
+    const trnField = document.getElementById('id_trn_code');
+    if (trnField) {
+        // Prevent typing special characters
+        trnField.addEventListener('keydown', function(e) {
+            // Allow: backspace, delete, tab, escape, enter, arrows
+            const allowedKeys = ['Backspace', 'Delete', 'Tab', 'Escape', 'Enter', 
+                               'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown'];
+            
+            // Allow Ctrl/Cmd shortcuts (Ctrl+A, Ctrl+C, Ctrl+V, etc.)
+            if (e.ctrlKey || e.metaKey) {
+                return;
+            }
+            
+            // Allow if it's a special key
+            if (allowedKeys.includes(e.key)) {
+                return;
+            }
+            
+            // Check if the key is alphanumeric
+            const isAlphanumeric = /^[a-zA-Z0-9]$/.test(e.key);
+            
+            if (!isAlphanumeric) {
+                e.preventDefault();
+            }
+        });
+
+        // Remove non-alphanumeric characters on paste or input
+        trnField.addEventListener('input', function(e) {
+            // Remove any character that's not a letter or number
+            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+        });
+
+        // Final validation on blur
+        trnField.addEventListener('blur', function(e) {
+            this.value = this.value.replace(/[^a-zA-Z0-9]/g, '');
+        });
+    }
 });
